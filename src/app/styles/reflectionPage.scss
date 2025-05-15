@@ -13,3 +13,9 @@
 .container {
   overflow: visible !important;
 }
+
+.swiper-slide-shadow-left,
+.swiper-slide-shadow-right {
+  background: rgba(0, 0, 0, 0.1) !important; // lower alpha = less intense
+  border-radius: .75rem;
+}

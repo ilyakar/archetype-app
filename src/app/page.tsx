@@ -8,6 +8,7 @@ import type { Swiper as SwiperType } from 'swiper'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/effect-coverflow'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './styles/reflectionPage.scss'
 
@@ -93,7 +94,7 @@ export default function Home() {
           <Card className="shadow-sm p-3">
             <Card.Body>
               <Card.Title className="mb-4">Describe one decision you made today that reflects your personal values:</Card.Title>
-              <Form.Group>
+              <Form.Group className="input-group input-group-outline">
                 <Form.Control
                   as="textarea"
                   placeholder="Today I made the following decision..."
@@ -111,7 +112,7 @@ export default function Home() {
           <Card className="shadow-sm p-3">
             <Card.Body>
               <Card.Title className="mb-4">Where did you face resistance today, and how did you respond:</Card.Title>
-              <Form.Group>
+              <Form.Group className="input-group input-group-outline">
                 <Form.Control
                   as="textarea"
                   placeholder="Today I faced resistance when... I responded by..."
@@ -131,7 +132,7 @@ export default function Home() {
       {activeIndex === 0 && (
         <div className="d-flex justify-content-end mt-4">
           <Button variant="primary" onClick={() => swiperRef.current?.slideNext()} disabled={!isValid(userResponse1)}>
-            Next <i className="bi bi-arrow-right" />
+            Next <i className="bi bi-chevron-right" />
           </Button>
         </div>
       )}
@@ -139,7 +140,7 @@ export default function Home() {
       {activeIndex === 1 && (
         <div className="d-flex justify-content-between mt-4">
           <Button variant="outline-secondary" onClick={() => swiperRef.current?.slidePrev()}>
-            <i className="bi bi-arrow-left" /> Back
+            <i className="bi bi-chevron-left" /> Back
           </Button>
 
           <Button variant="success" onClick={handleSubmit} disabled={!isValid(userResponse1) || !isValid(userResponse2) || loading}>
@@ -147,7 +148,7 @@ export default function Home() {
               <Spinner size="sm" animation="border" />
             ) : (
               <>
-                Submit Reflection <i className="bi bi-arrow-right" />
+                Submit Reflection <i className="bi bi-chevron-right" />
               </>
             )}
           </Button>

@@ -10,10 +10,13 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.6",
     "bootstrap-icons": "^1.13.1",
     "bootswatch": "^5.3.6",
     "lucide-react": "^0.477.0",
+    "material-dashboard": "^3.0.9",
+    "material-icons": "^1.13.14",
     "next": "15.2.1",
     "openai": "^4.98.0",
     "react": "^19.0.0",
