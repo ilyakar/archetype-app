@@ -6,20 +6,31 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext js,jsx,ts,tsx --fix",
+    "format": "prettier --write ."
   },
   "dependencies": {
+    "bootstrap": "^5.3.6",
+    "lucide-react": "^0.477.0",
+    "next": "15.2.1",
     "react": "^19.0.0",
+    "react-bootstrap": "^2.10.10",
     "react-dom": "^19.0.0",
-    "next": "15.3.2"
+    "recharts": "^2.15.1",
+    "sass": "^1.85.1"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.2",
-    "@eslint/eslintrc": "^3"
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "eslint": "^8.48.0",
+    "eslint-config-next": "^15.2.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5"
   }
 }
