@@ -1,0 +1,15 @@
+.swiper {
+  overflow: visible !important; // Make sure Swiper wrapper doesn't clip the 3D effect
+}
+
+.swiper-slide {
+  overflow: visible;
+}
+
+.reflection-slide {
+  overflow: visible;
+}
+
+.container {
+  overflow: visible !important;
+}
