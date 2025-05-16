@@ -28,7 +28,7 @@ export default function Home() {
   const dailyReflectionData = useSelector((state: RootState) => state.User.dailyReflectionData)
   const dailyReflectionSubmittedDate = useSelector((state: RootState) => state.User.dailyReflectionSubmittedDate)
 
-  const isValid = (text: string) => text.trim().split(/\s+/).length >= 20
+  const isValidLength = (text: string) => text.trim().split(/\s+/).length >= 20
 
   // Auto-hide the error alert
   useEffect(() => {
@@ -40,33 +40,6 @@ export default function Home() {
       return () => clearTimeout(timeout)
     }
   }, [error])
-
-  const handleSubmit = async () => {
-    setLoading(true)
-    setError('')
-
-    fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ personalValues, dailyReflectionResponse1, dailyReflectionResponse2 })
-    })
-      .then(res => res.json())
-      .then(openAiReflectionData => {
-        console.log('OPENAI got result:', openAiReflectionData)
-        dispatch(
-          updateUser({
-            dailyReflectionData: openAiReflectionData,
-            dailyReflectionSubmittedDate: new Date()
-          })
-        )
-      })
-      .catch((error: { message: string }) => {
-        setError(`Oops. Got an error: ${error.message}`)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }
 
   const _onPersonalValuesChange = (personalValues: string) => {
     dispatch(updateUser({ personalValues: personalValues }))
@@ -109,10 +82,115 @@ export default function Home() {
     }
   }
 
+  const isAnswerGood = ({ question, answer }: { question: string; answer: string }): Promise<boolean> => {
+    setLoading(true)
+    setError('')
+
+    return fetch('/api/isGoodAnswerAnalysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: question,
+        userResponse: answer,
+        personalValues: personalValues
+      })
+    })
+      .then(res => res.json())
+      .then(openAiIsGoodAnswerAnalysis => {
+        console.log('OPENAI got isGoodAnswerAnalysis:', openAiIsGoodAnswerAnalysis)
+        // Answer passed, great!
+        if (openAiIsGoodAnswerAnalysis?.questionPassed) {
+          return true
+        }
+        // Answer didn't pass. Explain why in error
+        else {
+          setError(openAiIsGoodAnswerAnalysis?.questionFailedSummary)
+          return false
+        }
+      })
+      .catch((error: { message: string }) => {
+        setError(`Oops. Got an error: ${error.message}`)
+        return false
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
+  const _onDailyResponse1NextPress = () => {
+    // If personal values text is too short
+    if (!isValidLength(personalValues)) {
+      return setError('Your personal values should be 20 words or more')
+    }
+    // If dailyReflection1 response is too short
+    else if (!isValidLength(dailyReflectionResponse1)) {
+      return setError('Your daily reflection response should be 20 words or more')
+    }
+
+    isAnswerGood({
+      question: 'Describe one decision you made today that reflects your personal values',
+      answer: dailyReflectionResponse1
+    }).then((passed: boolean) => {
+      if (passed) {
+        swiperRef.current?.slideNext()
+      }
+    })
+  }
+
+  const _onSubmitReflectionPress = () => {
+    // If personal values text is too short
+    if (!isValidLength(personalValues)) {
+      return setError('Your personal values should be 20 words or more')
+    }
+    // If dailyReflection1 response is too short
+    else if (!isValidLength(dailyReflectionResponse1)) {
+      return setError('Your daily reflection response #1 should be 20 words or more')
+    }
+    // If dailyReflection2 response is too short
+    else if (!isValidLength(dailyReflectionResponse2)) {
+      return setError('Your daily reflection response #2 should be 20 words or more')
+    }
+
+    isAnswerGood({
+      question: 'Where did you face resistance today, and how did you respond',
+      answer: dailyReflectionResponse2
+    }).then((passed: boolean) => {
+      if (passed) {
+        submitAllDataToOpenAIForReflectionAnalysis()
+      }
+    })
+  }
+
+  const submitAllDataToOpenAIForReflectionAnalysis = () => {
+    setLoading(true)
+    setError('')
+
+    fetch('/api/reflectionAnalysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ personalValues, dailyReflectionResponse1, dailyReflectionResponse2 })
+    })
+      .then(res => res.json())
+      .then(openAiReflectionData => {
+        dispatch(
+          updateUser({
+            dailyReflectionData: openAiReflectionData,
+            dailyReflectionSubmittedDate: new Date()
+          })
+        )
+      })
+      .catch((error: { message: string }) => {
+        setError(`Oops. Got an error: ${error.message}`)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
   return (
     <>
       {error && (
-        <Alert variant="danger" className="error-alert" dismissible onClick={() => setError('')} style={{ cursor: 'pointer' }}>
+        <Alert variant="danger" className="error-alert shadow-sm text-white" onClick={() => setError('')} style={{ cursor: 'pointer' }}>
           {error}
         </Alert>
       )}
@@ -131,7 +209,7 @@ export default function Home() {
                 rows={4}
                 value={personalValues}
                 onChange={e => _onPersonalValuesChange(e.target.value)}
-                isInvalid={!isValid(personalValues)}
+                isInvalid={!isValidLength(personalValues)}
               />
             </Form.Group>
           </Card>
@@ -163,7 +241,7 @@ export default function Home() {
                         rows={4}
                         value={dailyReflectionResponse1}
                         onChange={e => _onDailyReflectionResponse1Change(e.target.value)}
-                        isInvalid={!isValid(dailyReflectionResponse1)}
+                        isInvalid={!isValidLength(dailyReflectionResponse1)}
                       />
                     </Form.Group>
                   </Card.Body>
@@ -181,7 +259,7 @@ export default function Home() {
                         rows={4}
                         value={dailyReflectionResponse2}
                         onChange={e => _onDailyReflectionResponse2Change(e.target.value)}
-                        isInvalid={!isValid(dailyReflectionResponse2)}
+                        isInvalid={!isValidLength(dailyReflectionResponse2)}
                       />
                     </Form.Group>
                   </Card.Body>
@@ -191,11 +269,14 @@ export default function Home() {
 
             {activeIndex === 0 && (
               <div className="d-flex justify-content-end mt-4">
-                <Button
-                  variant="primary"
-                  onClick={() => swiperRef.current?.slideNext()}
-                  disabled={!isValid(personalValues) || !isValid(dailyReflectionResponse1)}>
-                  Next <i className="bi bi-chevron-right" />
+                <Button variant="primary" onClick={_onDailyResponse1NextPress}>
+                  {loading ? (
+                    <Spinner size="sm" animation="border" variant="light" style={{ marginTop: 2 }} />
+                  ) : (
+                    <>
+                      Next <i className="bi bi-chevron-right" />
+                    </>
+                  )}
                 </Button>
               </div>
             )}
@@ -206,10 +287,7 @@ export default function Home() {
                   <i className="bi bi-chevron-left" /> Back
                 </Button>
 
-                <Button
-                  variant="success"
-                  onClick={handleSubmit}
-                  disabled={!isValid(personalValues) || !isValid(dailyReflectionResponse1) || !isValid(dailyReflectionResponse2) || loading}>
+                <Button variant="success" onClick={_onSubmitReflectionPress}>
                   {loading ? (
                     <Spinner size="sm" animation="border" variant="light" style={{ marginTop: 2 }} />
                   ) : (

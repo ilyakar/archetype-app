@@ -33,7 +33,7 @@ Answers:
 `
 
 // ────────────────────────────────────────────────────────────
-// Route handler (no async/await; returns a Promise<NextResponse>)
+// Route handler
 // ────────────────────────────────────────────────────────────
 export const POST = (req: Request): Promise<Response> => {
   return req
@@ -43,9 +43,10 @@ export const POST = (req: Request): Promise<Response> => {
       return fetchCompletion(prompt)
     })
     .then(validRawJson => {
-      // If OpenAI returned nothing useful after retries, keep the app alive
-      const safeJson = validRawJson ?? '{"score":0,"summary":"No summary.","flag":"No flag."}'
-      const parsed = JSON.parse(safeJson)
+      if (!validRawJson) {
+        throw new Error('No valid json received from OpenAI')
+      }
+      const parsed = JSON.parse(validRawJson)
       return NextResponse.json(parsed)
     })
     .catch(error => {
@@ -70,11 +71,13 @@ const isReplyGood = (chatGptReply?: string): boolean => {
 const fetchCompletion = (prompt: string, attempt = 1): Promise<string | undefined> =>
   openai.chat.completions
     .create({
-      model: 'gpt-4o', // or 'gpt-4' if you prefer
+      model: 'gpt-4o',
       temperature: 0.7,
       messages: [{ role: 'user', content: prompt }]
     })
-    .then(response => response.choices[0]?.message?.content) // Gets the relevant data from OpenAi's response
+    // Gets the relevant data from OpenAi's response
+    .then(response => response.choices[0]?.message?.content)
+    // Cleans up the OpenAI response (sometimes includes ```json ... ``` wrappings, whitespaces, etc.
     .then(response =>
       response
         ?.trim()
@@ -82,7 +85,8 @@ const fetchCompletion = (prompt: string, attempt = 1): Promise<string | undefine
         .replace(/^```/, '')
         .replace(/```$/, '')
         .trim()
-    ) // Cleans up the OpenAI response (sometimes includes ```json ... ``` wrappings, whitespaces, etc.
+    )
+    // The cleaned and good chatGpt output
     .then(chatGptReply => {
       // If the ChatGPT reply is good
       if (isReplyGood(chatGptReply)) {
