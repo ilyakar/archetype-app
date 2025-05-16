@@ -13,8 +13,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import './styles/reflectionPage.scss'
 
 export default function Home() {
-  const [userResponse1, setuserResponse1] = useState('')
-  const [userResponse2, setuserResponse2] = useState('')
+  const [userResponse1, setUserResponse1] = useState('')
+  const [userResponse2, setUserResponse2] = useState('')
+  const [personalValues, setPersonalValues] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -22,7 +23,7 @@ export default function Home() {
   const [activeIndex, setActiveIndex] = useState(0)
   const swiperRef = useRef<SwiperType | null>(null)
 
-  const isValid = (text: string) => text.trim().split(/\s+/).length >= 2 // Replace with 20 in production
+  const isValid = (text: string) => text.trim().split(/\s+/).length >= 20
 
   const handleSubmit = async () => {
     if (!isValid(userResponse1) || !isValid(userResponse2)) {
@@ -49,6 +50,10 @@ export default function Home() {
       .finally(() => {
         setLoading(false)
       })
+  }
+
+  const _onPersonalValuesChange = (personalValues: string) => {
+    setPersonalValues(personalValues)
   }
 
   if (submitted && result) {
@@ -78,82 +83,103 @@ export default function Home() {
   }
 
   return (
-    <Container className="py-5" style={{ maxWidth: '600px' }}>
-      <h1 className="mb-5">Daily Reflection</h1>
-
-      <Swiper
-        modules={[Pagination, EffectCoverflow]}
-        effect="coverflow"
-        spaceBetween={30}
-        slidesPerView={1}
-        className="mb-4"
-        onSwiper={swiper => (swiperRef.current = swiper)}
-        onSlideChange={swiper => setActiveIndex(swiper.activeIndex)}
-        allowTouchMove={false}>
-        <SwiperSlide className="reflection-slide">
-          <Card className="shadow-sm p-3">
-            <Card.Body>
-              <Card.Title className="mb-4">Describe one decision you made today that reflects your personal values:</Card.Title>
-              <Form.Group className="input-group input-group-outline">
-                <Form.Control
-                  as="textarea"
-                  placeholder="Today I made the following decision..."
-                  rows={4}
-                  value={userResponse1}
-                  onChange={e => setuserResponse1(e.target.value)}
-                  isInvalid={!!userResponse1 && !isValid(userResponse1)}
-                />
-              </Form.Group>
-            </Card.Body>
+    <>
+      <div className="hero">
+        <Container className="py-5" style={{ maxWidth: '600px' }}>
+          <h2 className="mb-3">Profile 😎</h2>
+          <Card className="card-plain mb-5">
+            <h5>What are your personal values?</h5>
+            <Form.Group className="input-group input-group-outline">
+              <Form.Control
+                as="textarea"
+                placeholder="Please describe in 2-3 sentences"
+                rows={4}
+                value={personalValues}
+                onChange={e => _onPersonalValuesChange(e.target.value)}
+                isInvalid={!!personalValues && !isValid(personalValues)}
+              />
+            </Form.Group>
           </Card>
-        </SwiperSlide>
+        </Container>
+      </div>
 
-        <SwiperSlide>
-          <Card className="shadow-sm p-3">
-            <Card.Body>
-              <Card.Title className="mb-4">Where did you face resistance today, and how did you respond:</Card.Title>
-              <Form.Group className="input-group input-group-outline">
-                <Form.Control
-                  as="textarea"
-                  placeholder="Today I faced resistance when... I responded by..."
-                  rows={4}
-                  value={userResponse2}
-                  onChange={e => setuserResponse2(e.target.value)}
-                  isInvalid={!!userResponse2 && !isValid(userResponse2)}
-                />
-              </Form.Group>
-            </Card.Body>
-          </Card>
-        </SwiperSlide>
-      </Swiper>
+      <Container className="py-5" style={{ maxWidth: '600px' }}>
+        <h2 className="mb-5">Daily Reflection 🧐</h2>
 
-      {error && <Alert variant="danger">{error}</Alert>}
+        <Swiper
+          modules={[Pagination, EffectCoverflow]}
+          effect="coverflow"
+          spaceBetween={30}
+          slidesPerView={1}
+          className="mb-4"
+          onSwiper={swiper => (swiperRef.current = swiper)}
+          onSlideChange={swiper => setActiveIndex(swiper.activeIndex)}
+          allowTouchMove={false}>
+          <SwiperSlide className="reflection-slide">
+            <Card className="shadow-sm p-3">
+              <Card.Body>
+                <Card.Title className="mb-4">Describe one decision you made today that reflects your personal values:</Card.Title>
+                <Form.Group className="input-group input-group-outline">
+                  <Form.Control
+                    as="textarea"
+                    placeholder="Today I made the following decision..."
+                    rows={4}
+                    value={userResponse1}
+                    onChange={e => setUserResponse1(e.target.value)}
+                    isInvalid={!!userResponse1 && !isValid(userResponse1)}
+                  />
+                </Form.Group>
+              </Card.Body>
+            </Card>
+          </SwiperSlide>
 
-      {activeIndex === 0 && (
-        <div className="d-flex justify-content-end mt-4">
-          <Button variant="primary" onClick={() => swiperRef.current?.slideNext()} disabled={!isValid(userResponse1)}>
-            Next <i className="bi bi-chevron-right" />
-          </Button>
-        </div>
-      )}
+          <SwiperSlide>
+            <Card className="shadow-sm p-3">
+              <Card.Body>
+                <Card.Title className="mb-4">Where did you face resistance today, and how did you respond:</Card.Title>
+                <Form.Group className="input-group input-group-outline">
+                  <Form.Control
+                    as="textarea"
+                    placeholder="Today I faced resistance when... I responded by..."
+                    rows={4}
+                    value={userResponse2}
+                    onChange={e => setUserResponse2(e.target.value)}
+                    isInvalid={!!userResponse2 && !isValid(userResponse2)}
+                  />
+                </Form.Group>
+              </Card.Body>
+            </Card>
+          </SwiperSlide>
+        </Swiper>
 
-      {activeIndex === 1 && (
-        <div className="d-flex justify-content-between mt-4">
-          <Button variant="outline-secondary" onClick={() => swiperRef.current?.slidePrev()}>
-            <i className="bi bi-chevron-left" /> Back
-          </Button>
+        {error && <Alert variant="danger">{error}</Alert>}
 
-          <Button variant="success" onClick={handleSubmit} disabled={!isValid(userResponse1) || !isValid(userResponse2) || loading}>
-            {loading ? (
-              <Spinner size="sm" animation="border" />
-            ) : (
-              <>
-                Submit Reflection <i className="bi bi-chevron-right" />
-              </>
-            )}
-          </Button>
-        </div>
-      )}
-    </Container>
+        {activeIndex === 0 && (
+          <div className="d-flex justify-content-end mt-4">
+            <Button variant="primary" onClick={() => swiperRef.current?.slideNext()} disabled={!isValid(userResponse1)}>
+              Next <i className="bi bi-chevron-right" />
+            </Button>
+          </div>
+        )}
+
+        {activeIndex === 1 && (
+          <div className="d-flex justify-content-between mt-4">
+            <Button variant="outline-secondary" onClick={() => swiperRef.current?.slidePrev()}>
+              <i className="bi bi-chevron-left" /> Back
+            </Button>
+
+            <Button variant="success" onClick={handleSubmit} disabled={!isValid(userResponse1) || !isValid(userResponse2) || loading}>
+              {loading ? (
+                <Spinner size="sm" animation="border" />
+              ) : (
+                <>
+                  Submit Reflection <i className="bi bi-chevron-right" />
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+      </Container>
+    </>
   )
 }
