@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Container, Button, Form, Alert, Spinner, Card } from 'react-bootstrap'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, EffectCoverflow } from 'swiper/modules'
@@ -30,6 +30,17 @@ export default function Home() {
 
   const isValid = (text: string) => text.trim().split(/\s+/).length >= 20
 
+  // Auto-hide the error alert
+  useEffect(() => {
+    if (error) {
+      const timeout = setTimeout(() => {
+        setError('')
+      }, 10000)
+
+      return () => clearTimeout(timeout)
+    }
+  }, [error])
+
   const handleSubmit = async () => {
     setLoading(true)
     setError('')
@@ -37,10 +48,11 @@ export default function Home() {
     fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dailyReflectionResponse1, dailyReflectionResponse2 })
+      body: JSON.stringify({ personalValues, dailyReflectionResponse1, dailyReflectionResponse2 })
     })
       .then(res => res.json())
       .then(openAiReflectionData => {
+        console.log('OPENAI got result:', openAiReflectionData)
         dispatch(
           updateUser({
             dailyReflectionData: openAiReflectionData,
@@ -48,8 +60,8 @@ export default function Home() {
           })
         )
       })
-      .catch((response: any) => {
-        setError(response.error)
+      .catch((error: { message: string }) => {
+        setError(`Oops. Got an error: ${error.message}`)
       })
       .finally(() => {
         setLoading(false)
@@ -68,14 +80,6 @@ export default function Home() {
     dispatch(updateUser({ dailyReflectionResponse2: response2 }))
   }
 
-  const _onResetProfilePress = () => {
-    dispatch(
-      updateUser({
-        personalValues: ''
-      })
-    )
-  }
-
   const _onResetDailyReflectionPress = () => {
     dispatch(
       updateUser({
@@ -85,6 +89,8 @@ export default function Home() {
         dailyReflectionData: undefined
       })
     )
+
+    setActiveIndex(0)
   }
 
   const shouldShowDailyReflectionSummary = () => {
@@ -105,6 +111,11 @@ export default function Home() {
 
   return (
     <>
+      {error && (
+        <Alert variant="danger" className="error-alert" dismissible onClick={() => setError('')} style={{ cursor: 'pointer' }}>
+          {error}
+        </Alert>
+      )}
       <Button variant="outline-warning" className="reset-daily-reflection-button" onClick={_onResetDailyReflectionPress}>
         Reset Daily Reflection
       </Button>
@@ -120,7 +131,7 @@ export default function Home() {
                 rows={4}
                 value={personalValues}
                 onChange={e => _onPersonalValuesChange(e.target.value)}
-                isInvalid={!!personalValues && !isValid(personalValues)}
+                isInvalid={!isValid(personalValues)}
               />
             </Form.Group>
           </Card>
@@ -152,7 +163,7 @@ export default function Home() {
                         rows={4}
                         value={dailyReflectionResponse1}
                         onChange={e => _onDailyReflectionResponse1Change(e.target.value)}
-                        isInvalid={!!dailyReflectionResponse1 && !isValid(dailyReflectionResponse1)}
+                        isInvalid={!isValid(dailyReflectionResponse1)}
                       />
                     </Form.Group>
                   </Card.Body>
@@ -170,7 +181,7 @@ export default function Home() {
                         rows={4}
                         value={dailyReflectionResponse2}
                         onChange={e => _onDailyReflectionResponse2Change(e.target.value)}
-                        isInvalid={!!dailyReflectionResponse2 && !isValid(dailyReflectionResponse2)}
+                        isInvalid={!isValid(dailyReflectionResponse2)}
                       />
                     </Form.Group>
                   </Card.Body>
@@ -178,11 +189,12 @@ export default function Home() {
               </SwiperSlide>
             </Swiper>
 
-            {error && <Alert variant="danger">{error}</Alert>}
-
             {activeIndex === 0 && (
               <div className="d-flex justify-content-end mt-4">
-                <Button variant="primary" onClick={() => swiperRef.current?.slideNext()} disabled={!isValid(dailyReflectionResponse1)}>
+                <Button
+                  variant="primary"
+                  onClick={() => swiperRef.current?.slideNext()}
+                  disabled={!isValid(personalValues) || !isValid(dailyReflectionResponse1)}>
                   Next <i className="bi bi-chevron-right" />
                 </Button>
               </div>
@@ -197,9 +209,9 @@ export default function Home() {
                 <Button
                   variant="success"
                   onClick={handleSubmit}
-                  disabled={!isValid(dailyReflectionResponse1) || !isValid(dailyReflectionResponse2) || loading}>
+                  disabled={!isValid(personalValues) || !isValid(dailyReflectionResponse1) || !isValid(dailyReflectionResponse2) || loading}>
                   {loading ? (
-                    <Spinner size="sm" animation="border" />
+                    <Spinner size="sm" animation="border" variant="light" style={{ marginTop: 2 }} />
                   ) : (
                     <>
                       Submit Reflection <i className="bi bi-chevron-right" />

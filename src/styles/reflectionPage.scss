@@ -29,3 +29,12 @@
   top: 10px;
   right: 10px;
 }
+
+.error-alert {
+  position: fixed;
+  z-index: 5;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 600px;
+  top: 60px;
+}

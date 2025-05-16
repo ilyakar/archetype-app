@@ -10,9 +10,10 @@ const MAX_TRIES = 3
 // ────────────────────────────────────────────────────────────
 // Helpers
 // ────────────────────────────────────────────────────────────
-const buildPrompt = (userResponse1: string, userResponse2: string) => `
-You are a reflection assistant. The user will answer two introspective questions. Based on their answers, return:
+const buildPrompt = (personalValues: string, dailyReflectionResponse1: string, dailyReflectionResponse2: string) => `
+You are a reflection assistant. The user will answer two introspective questions.
 
+Based on their answers, return:
 - An overall alignment score (0–100)
 - A one-sentence summary of their integrity today
 - A one-sentence flag if any avoidance, weakness, or drift is detected
@@ -24,9 +25,11 @@ Your response should be valid json in this format:
   "flag": string | null
 }
 
+The user's personal values: ${personalValues}
+
 Answers:
-1. ${userResponse1}
-2. ${userResponse2}
+1. ${dailyReflectionResponse1}
+2. ${dailyReflectionResponse2}
 `
 
 // ────────────────────────────────────────────────────────────
@@ -35,8 +38,8 @@ Answers:
 export const POST = (req: Request): Promise<Response> => {
   return req
     .json()
-    .then(({ userResponse1, userResponse2 }) => {
-      const prompt = buildPrompt(userResponse1, userResponse2)
+    .then(({ personalValues, dailyReflectionResponse1, dailyReflectionResponse2 }) => {
+      const prompt = buildPrompt(personalValues, dailyReflectionResponse1, dailyReflectionResponse2)
       return fetchCompletion(prompt)
     })
     .then(validRawJson => {
@@ -46,8 +49,8 @@ export const POST = (req: Request): Promise<Response> => {
       return NextResponse.json(parsed)
     })
     .catch(error => {
-      console.error('Reflection API error:', error)
-      return NextResponse.json({ error: `Failed to generate reflection. Error: ${error}` }, { status: 500 })
+      console.error('Got an error trying to work with OpenAI:', error)
+      throw new Error(error)
     })
 }
 
@@ -81,8 +84,6 @@ const fetchCompletion = (prompt: string, attempt = 1): Promise<string | undefine
         .trim()
     ) // Cleans up the OpenAI response (sometimes includes ```json ... ``` wrappings, whitespaces, etc.
     .then(chatGptReply => {
-      console.log(`ChatGPT response: ${chatGptReply}`)
-
       // If the ChatGPT reply is good
       if (isReplyGood(chatGptReply)) {
         return chatGptReply
@@ -92,12 +93,12 @@ const fetchCompletion = (prompt: string, attempt = 1): Promise<string | undefine
       // -----
       // We have more attempts, let's try to get another response
       if (attempt < MAX_TRIES) {
-        console.log(`Attempt #${attempt} produced an invalid reply. Retrying …`)
+        console.info(`Attempt #${attempt} produced an invalid reply. Retrying …`)
         return fetchCompletion(prompt, attempt + 1)
       }
       // No more attempts left. We give up.
       else {
-        console.log(`Attempt #${attempt} is the last try. Returning whatever we got.`)
+        console.info(`Attempt #${attempt} is the last try. Returning whatever we got.`)
         return chatGptReply // may be undefined or invalid JSON, but we give up
       }
     })
@@ -105,7 +106,7 @@ const fetchCompletion = (prompt: string, attempt = 1): Promise<string | undefine
     .catch(err => {
       // We still have attempts left, retry getting response
       if (attempt < MAX_TRIES) {
-        console.log(`OpenAI error on attempt #${attempt}: ${err}. Retrying …`)
+        console.info(`OpenAI error on attempt #${attempt}: ${err}. Retrying …`)
         return fetchCompletion(prompt, attempt + 1)
       }
       // No more attempts left. Give up
