@@ -17,7 +17,7 @@ You are a reflection assistant. The user will answer two introspective questions
 - A one-sentence summary of their integrity today
 - A one-sentence flag if any avoidance, weakness, or drift is detected
 
-Your response should look like this:
+Your response should be valid json in this format:
 {
   "score": number,
   "summary": string,
@@ -36,9 +36,7 @@ export const POST = (req: Request): Promise<Response> => {
   return req
     .json()
     .then(({ userResponse1, userResponse2 }) => {
-      console.log(`Let's start the API response fetch. UserResponse1: ${userResponse1}. UserResponse2: ${userResponse2}`)
       const prompt = buildPrompt(userResponse1, userResponse2)
-      console.log(`ChatGPT Prompt: ${prompt}`)
       return fetchCompletion(prompt)
     })
     .then(validRawJson => {
@@ -73,13 +71,20 @@ const fetchCompletion = (prompt: string, attempt = 1): Promise<string | undefine
       temperature: 0.7,
       messages: [{ role: 'user', content: prompt }]
     })
-    .then(res => res.choices[0]?.message?.content?.trim())
+    .then(response => response.choices[0]?.message?.content) // Gets the relevant data from OpenAi's response
+    .then(response =>
+      response
+        ?.trim()
+        .replace(/^```json/, '')
+        .replace(/^```/, '')
+        .replace(/```$/, '')
+        .trim()
+    ) // Cleans up the OpenAI response (sometimes includes ```json ... ``` wrappings, whitespaces, etc.
     .then(chatGptReply => {
       console.log(`ChatGPT response: ${chatGptReply}`)
 
       // If the ChatGPT reply is good
       if (isReplyGood(chatGptReply)) {
-        console.log('Reply is good')
         return chatGptReply
       }
 

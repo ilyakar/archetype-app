@@ -7,13 +7,17 @@ export interface DailyReflectionData {
 }
 
 export interface UserState {
-  personalValues?: string
+  personalValues: string
+  dailyReflectionResponse1: string
+  dailyReflectionResponse2: string
   dailyReflectionSubmittedDate?: Date
   dailyReflectionData?: DailyReflectionData
 }
 
 const initialState: UserState = {
-  personalValues: undefined,
+  personalValues: '',
+  dailyReflectionResponse1: '',
+  dailyReflectionResponse2: '',
   dailyReflectionSubmittedDate: undefined,
   dailyReflectionData: undefined
 }
@@ -28,7 +32,9 @@ export const userSlice = createSlice({
         ...payload
       }
     },
-    resetUser: () => initialState
+    resetUser: () => {
+      return initialState
+    }
   }
 })
 
