@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import 'material-dashboard/assets/css/material-dashboard.css'
-// import 'bootstrap/dist/css/bootstrap.min.css'
+import store from '@redux/stores'
+import { persistStore } from 'redux-persist'
 import './globals.css'
+import Providers from './Providers'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,7 +28,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   )
 }

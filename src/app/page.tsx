@@ -10,18 +10,22 @@ import 'swiper/css/pagination'
 import 'swiper/css/effect-coverflow'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
-import './styles/reflectionPage.scss'
+import '@styles/reflectionPage.scss'
+import { updateUser } from '@redux/reducers/User'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@redux/stores'
 
 export default function Home() {
   const [userResponse1, setUserResponse1] = useState('')
   const [userResponse2, setUserResponse2] = useState('')
-  const [personalValues, setPersonalValues] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
   const swiperRef = useRef<SwiperType | null>(null)
+  const dispatch = useDispatch()
+  const personalValues = useSelector((state: RootState) => state.User.personalValues)
 
   const isValid = (text: string) => text.trim().split(/\s+/).length >= 20
 
@@ -53,7 +57,7 @@ export default function Home() {
   }
 
   const _onPersonalValuesChange = (personalValues: string) => {
-    setPersonalValues(personalValues)
+    dispatch(updateUser({ personalValues: personalValues }))
   }
 
   if (submitted && result) {
