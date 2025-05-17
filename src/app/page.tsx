@@ -17,7 +17,11 @@ import { RootState } from '@redux/stores'
 import moment from 'moment'
 
 export default function Home() {
+  const [checkingPersonalValues, setCheckingPersonalValues] = useState(false)
+  const [checkingDailyResponse1, setCheckingDailyResponse1] = useState(false)
+  const [checkingDailyResponse2, setCheckingDailyResponse2] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [personalValuesLocal, setPersonalValuesLocal] = useState('')
   const [error, setError] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
   const swiperRef = useRef<SwiperType | null>(null)
@@ -30,6 +34,11 @@ export default function Home() {
 
   const isValidLength = (text: string) => text.trim().split(/\s+/).length >= 20
 
+  // On page load, if we have personalValues saved, set them locally so that the textArea will show them
+  useEffect(() => {
+    setPersonalValuesLocal(personalValues)
+  }, [personalValues])
+
   // Auto-hide the error alert
   useEffect(() => {
     if (error) {
@@ -41,8 +50,8 @@ export default function Home() {
     }
   }, [error])
 
-  const _onPersonalValuesChange = (personalValues: string) => {
-    dispatch(updateUser({ personalValues: personalValues }))
+  const _onPersonalValuesChange = (personalValuesLocal: string) => {
+    setPersonalValuesLocal(personalValuesLocal)
   }
 
   const _onDailyReflectionResponse1Change = (response1: string) => {
@@ -51,6 +60,16 @@ export default function Home() {
 
   const _onDailyReflectionResponse2Change = (response2: string) => {
     dispatch(updateUser({ dailyReflectionResponse2: response2 }))
+  }
+
+  const _onResetPersonalValuesPress = () => {
+    dispatch(
+      updateUser({
+        personalValues: ''
+      })
+    )
+
+    setActiveIndex(0)
   }
 
   const _onResetDailyReflectionPress = () => {
@@ -97,7 +116,6 @@ export default function Home() {
     })
       .then(res => res.json())
       .then(openAiIsGoodAnswerAnalysis => {
-        console.log('OPENAI got isGoodAnswerAnalysis:', openAiIsGoodAnswerAnalysis)
         // Answer passed, great!
         if (openAiIsGoodAnswerAnalysis?.questionPassed) {
           return true
@@ -117,20 +135,40 @@ export default function Home() {
       })
   }
 
-  const _onDailyResponse1NextPress = () => {
+  const _onPersonalValuesSavePress = () => {
     // If personal values text is too short
-    if (!isValidLength(personalValues)) {
+    if (!isValidLength(personalValuesLocal)) {
       return setError('Your personal values should be 20 words or more')
     }
+
+    setCheckingPersonalValues(true)
+
+    isAnswerGood({
+      question: 'What are your personal values?',
+      answer: personalValuesLocal
+    }).then((passed: boolean) => {
+      setCheckingPersonalValues(false)
+
+      if (passed) {
+        dispatch(updateUser({ personalValues: personalValuesLocal }))
+      }
+    })
+  }
+
+  const _onDailyResponse1NextPress = () => {
     // If dailyReflection1 response is too short
-    else if (!isValidLength(dailyReflectionResponse1)) {
+    if (!isValidLength(dailyReflectionResponse1)) {
       return setError('Your daily reflection response should be 20 words or more')
     }
+
+    setCheckingDailyResponse1(true)
 
     isAnswerGood({
       question: 'Describe one decision you made today that reflects your personal values',
       answer: dailyReflectionResponse1
     }).then((passed: boolean) => {
+      setCheckingDailyResponse1(false)
+
       if (passed) {
         swiperRef.current?.slideNext()
       }
@@ -138,12 +176,8 @@ export default function Home() {
   }
 
   const _onSubmitReflectionPress = () => {
-    // If personal values text is too short
-    if (!isValidLength(personalValues)) {
-      return setError('Your personal values should be 20 words or more')
-    }
     // If dailyReflection1 response is too short
-    else if (!isValidLength(dailyReflectionResponse1)) {
+    if (!isValidLength(dailyReflectionResponse1)) {
       return setError('Your daily reflection response #1 should be 20 words or more')
     }
     // If dailyReflection2 response is too short
@@ -151,10 +185,14 @@ export default function Home() {
       return setError('Your daily reflection response #2 should be 20 words or more')
     }
 
+    setCheckingDailyResponse2(true)
+
     isAnswerGood({
       question: 'Where did you face resistance today, and how did you respond',
       answer: dailyReflectionResponse2
     }).then((passed: boolean) => {
+      setCheckingDailyResponse2(true)
+
       if (passed) {
         submitAllDataToOpenAIForReflectionAnalysis()
       }
@@ -194,9 +232,14 @@ export default function Home() {
           {error}
         </Alert>
       )}
-      <Button variant="outline-warning" className="reset-daily-reflection-button" onClick={_onResetDailyReflectionPress}>
-        Reset Daily Reflection
-      </Button>
+      <div className="d-flex flex-column reset-buttons-container">
+        <Button variant="outline-secondary" onClick={_onResetPersonalValuesPress}>
+          Reset Personal Values
+        </Button>
+        <Button variant="secondary" onClick={_onResetDailyReflectionPress}>
+          Reset Daily Reflection
+        </Button>
+      </div>
       <div className="hero">
         <Container className="py-5" style={{ maxWidth: '600px' }}>
           <h2 className="mb-3">Profile 🏡</h2>
@@ -207,117 +250,125 @@ export default function Home() {
                 as="textarea"
                 placeholder="Please describe in 2-3 sentences"
                 rows={4}
-                value={personalValues}
+                value={personalValuesLocal}
                 onChange={e => _onPersonalValuesChange(e.target.value)}
-                isInvalid={!isValidLength(personalValues)}
+                isInvalid={!isValidLength(personalValuesLocal)}
               />
             </Form.Group>
+            <div className="d-flex mt-4">
+              <Button variant="outline-primary" onClick={_onPersonalValuesSavePress}>
+                {checkingPersonalValues ? <Spinner size="sm" animation="border" variant="primary" style={{ marginTop: 2 }} /> : <>Save</>}
+              </Button>
+            </div>
           </Card>
         </Container>
       </div>
 
-      <Container className="py-5" style={{ maxWidth: '600px' }}>
-        <h2 className="mb-5">Daily Reflection 🧐</h2>
+      <div className="daily-reflection-container">
+        {!personalValues && <div className="daily-reflection-blocker" />}
+        <Container className="py-5" style={{ maxWidth: '600px' }}>
+          <h2 className="mb-5">Daily Reflection 🧐</h2>
 
-        {!shouldShowDailyReflectionSummary() && (
-          <>
-            <Swiper
-              modules={[Pagination, EffectCoverflow]}
-              effect="coverflow"
-              spaceBetween={30}
-              slidesPerView={1}
-              className="mb-4"
-              onSwiper={swiper => (swiperRef.current = swiper)}
-              onSlideChange={swiper => setActiveIndex(swiper.activeIndex)}
-              allowTouchMove={false}>
-              <SwiperSlide className="reflection-slide">
-                <Card className="shadow-sm p-3">
-                  <Card.Body>
-                    <Card.Title className="mb-4">Describe one decision you made today that reflects your personal values:</Card.Title>
-                    <Form.Group className="input-group input-group-outline">
-                      <Form.Control
-                        as="textarea"
-                        placeholder="Today I made the following decision..."
-                        rows={4}
-                        value={dailyReflectionResponse1}
-                        onChange={e => _onDailyReflectionResponse1Change(e.target.value)}
-                        isInvalid={!isValidLength(dailyReflectionResponse1)}
-                      />
-                    </Form.Group>
-                  </Card.Body>
-                </Card>
-              </SwiperSlide>
+          {!shouldShowDailyReflectionSummary() && (
+            <>
+              <Swiper
+                modules={[Pagination, EffectCoverflow]}
+                effect="coverflow"
+                spaceBetween={30}
+                slidesPerView={1}
+                className="mb-4"
+                onSwiper={swiper => (swiperRef.current = swiper)}
+                onSlideChange={swiper => setActiveIndex(swiper.activeIndex)}
+                allowTouchMove={false}>
+                <SwiperSlide className="reflection-slide">
+                  <Card className="shadow-sm p-3">
+                    <Card.Body>
+                      <Card.Title className="mb-4">Describe one decision you made today that reflects your personal values:</Card.Title>
+                      <Form.Group className="input-group input-group-outline">
+                        <Form.Control
+                          as="textarea"
+                          placeholder="Today I made the following decision..."
+                          rows={4}
+                          value={dailyReflectionResponse1}
+                          onChange={e => _onDailyReflectionResponse1Change(e.target.value)}
+                          isInvalid={!isValidLength(dailyReflectionResponse1)}
+                        />
+                      </Form.Group>
+                    </Card.Body>
+                  </Card>
+                </SwiperSlide>
 
-              <SwiperSlide>
-                <Card className="shadow-sm p-3">
-                  <Card.Body>
-                    <Card.Title className="mb-4">Where did you face resistance today, and how did you respond:</Card.Title>
-                    <Form.Group className="input-group input-group-outline">
-                      <Form.Control
-                        as="textarea"
-                        placeholder="Today I faced resistance when... I responded by..."
-                        rows={4}
-                        value={dailyReflectionResponse2}
-                        onChange={e => _onDailyReflectionResponse2Change(e.target.value)}
-                        isInvalid={!isValidLength(dailyReflectionResponse2)}
-                      />
-                    </Form.Group>
-                  </Card.Body>
-                </Card>
-              </SwiperSlide>
-            </Swiper>
+                <SwiperSlide>
+                  <Card className="shadow-sm p-3">
+                    <Card.Body>
+                      <Card.Title className="mb-4">Where did you face resistance today, and how did you respond:</Card.Title>
+                      <Form.Group className="input-group input-group-outline">
+                        <Form.Control
+                          as="textarea"
+                          placeholder="Today I faced resistance when... I responded by..."
+                          rows={4}
+                          value={dailyReflectionResponse2}
+                          onChange={e => _onDailyReflectionResponse2Change(e.target.value)}
+                          isInvalid={!isValidLength(dailyReflectionResponse2)}
+                        />
+                      </Form.Group>
+                    </Card.Body>
+                  </Card>
+                </SwiperSlide>
+              </Swiper>
 
-            {activeIndex === 0 && (
-              <div className="d-flex justify-content-end mt-4">
-                <Button variant="primary" onClick={_onDailyResponse1NextPress}>
-                  {loading ? (
-                    <Spinner size="sm" animation="border" variant="light" style={{ marginTop: 2 }} />
-                  ) : (
-                    <>
-                      Next <i className="bi bi-chevron-right" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
+              {activeIndex === 0 && (
+                <div className="d-flex justify-content-end mt-4">
+                  <Button variant="primary" onClick={_onDailyResponse1NextPress}>
+                    {checkingDailyResponse1 ? (
+                      <Spinner size="sm" animation="border" variant="light" style={{ marginTop: 2 }} />
+                    ) : (
+                      <>
+                        Next <i className="bi bi-chevron-right" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
 
-            {activeIndex === 1 && (
-              <div className="d-flex justify-content-between mt-4">
-                <Button variant="outline-secondary" onClick={() => swiperRef.current?.slidePrev()}>
-                  <i className="bi bi-chevron-left" /> Back
-                </Button>
+              {activeIndex === 1 && (
+                <div className="d-flex justify-content-between mt-4">
+                  <Button variant="outline-secondary" onClick={() => swiperRef.current?.slidePrev()}>
+                    <i className="bi bi-chevron-left" /> Back
+                  </Button>
 
-                <Button variant="success" onClick={_onSubmitReflectionPress}>
-                  {loading ? (
-                    <Spinner size="sm" animation="border" variant="light" style={{ marginTop: 2 }} />
-                  ) : (
-                    <>
-                      Submit Reflection <i className="bi bi-chevron-right" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-          </>
-        )}
+                  <Button variant="success" onClick={_onSubmitReflectionPress}>
+                    {checkingDailyResponse2 ? (
+                      <Spinner size="sm" animation="border" variant="light" style={{ marginTop: 2 }} />
+                    ) : (
+                      <>
+                        Submit Reflection <i className="bi bi-chevron-right" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
 
-        {shouldShowDailyReflectionSummary() && (
-          <>
-            <p>
-              <strong>Alignment Score:</strong> {dailyReflectionData!.score}/100
-            </p>
-            <p>
-              <strong>Summary:</strong> {dailyReflectionData!.summary}
-            </p>
-            <p>
-              <strong>Flag:</strong> {dailyReflectionData!.flag || 'None'}
-            </p>
-            <p>
-              <strong>Regret Corecast:</strong> {dailyReflectionData!.regretForecast || 'None'}
-            </p>
-          </>
-        )}
-      </Container>
+          {shouldShowDailyReflectionSummary() && (
+            <>
+              <p>
+                <strong>Alignment Score:</strong> {dailyReflectionData!.score}/100
+              </p>
+              <p>
+                <strong>Summary:</strong> {dailyReflectionData!.summary}
+              </p>
+              <p>
+                <strong>Flag:</strong> {dailyReflectionData!.flag || 'None'}
+              </p>
+              <p>
+                <strong>Regret Corecast:</strong> {dailyReflectionData!.regretForecast || 'None'}
+              </p>
+            </>
+          )}
+        </Container>
+      </div>
     </>
   )
 }

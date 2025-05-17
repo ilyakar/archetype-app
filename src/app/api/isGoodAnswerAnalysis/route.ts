@@ -10,18 +10,39 @@ const MAX_TRIES = 3
 // ────────────────────────────────────────────────────────────
 // Helpers
 // ────────────────────────────────────────────────────────────
-const buildPrompt = (question: string, userResponse: string, personalValues: string) => `
-You are a reflection assistant. The user has provided an answer for the following question:
+const userDataForPrompt = () => {}
 
--------------
-"${question}"
+const buildPrompt = (question: string, userResponse: string, personalValues: string) => {
+  let userData = ''
+  // If we're analysing the personal values question
+  // ----------------------
+  if (question == 'What are your personal values?') {
+    userData = `"${question}"
+(the answer should be 20 words or more)
+
+The user's answer:
+${userResponse}`
+  }
+
+  // If we're analysing the other questions, include personal values into the user data
+  // ---------------------
+  else {
+    userData = `"${question}"
 (the answer should be 20 words or more)
 
 The user's answer:
 ${userResponse}
 
 The user's personal values:
-${personalValues}
+${personalValues}`
+  }
+
+  // The full prompt
+  // ----------------------
+  return `You are a reflection assistant. The user has provided an answer for the following question:
+
+-------------
+${userData}
 -----------
 
 - If the user's answer looks thoughtful then questionPassed should be true. If it looks like the user is just trying to brush off the task, then output false. Note: you are not gauging how well the answer aligns with the personal values. You are just assessing whether the user has put thought into their answer.
@@ -31,8 +52,8 @@ Your response should be valid json in this format:
 {
   "questionPassed": boolean,
   "questionFailedSummary": string | null
+}`
 }
-`
 
 // ────────────────────────────────────────────────────────────
 // Route handler

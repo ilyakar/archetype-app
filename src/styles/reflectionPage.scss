@@ -24,10 +24,10 @@
   background-color: rgba(0, 0, 0, 0.02);
 }
 
-.reset-daily-reflection-button {
+.reset-buttons-container {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 1rem;
+  right: 1rem;
 }
 
 .error-alert {
@@ -37,4 +37,19 @@
   transform: translateX(-50%);
   max-width: 600px;
   top: 60px;
+}
+
+.daily-reflection-container {
+  position: relative;
+}
+
+.daily-reflection-blocker {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: white;
+  opacity: 0.6;
+  z-index: 5;
 }
