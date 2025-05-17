@@ -199,7 +199,7 @@ export default function Home() {
       </Button>
       <div className="hero">
         <Container className="py-5" style={{ maxWidth: '600px' }}>
-          <h2 className="mb-3">Profile 😎</h2>
+          <h2 className="mb-3">Profile 🏡</h2>
           <Card className="card-plain mb-5">
             <h5>What are your personal values?</h5>
             <Form.Group className="input-group input-group-outline">
@@ -311,6 +311,9 @@ export default function Home() {
             </p>
             <p>
               <strong>Flag:</strong> {dailyReflectionData!.flag || 'None'}
+            </p>
+            <p>
+              <strong>Regret Corecast:</strong> {dailyReflectionData!.regretForecast || 'None'}
             </p>
           </>
         )}

@@ -30,7 +30,7 @@ ${personalValues}
 Your response should be valid json in this format:
 {
   "questionPassed": boolean,
-  "questionFailedSummary": string
+  "questionFailedSummary": string | null
 }
 `
 

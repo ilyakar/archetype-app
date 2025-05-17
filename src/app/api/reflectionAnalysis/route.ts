@@ -14,15 +14,17 @@ const buildPrompt = (personalValues: string, dailyReflectionResponse1: string, d
 You are a reflection assistant. The user will answer two introspective questions.
 
 Based on their answers, return:
-- An overall alignment score (0–100)
+- An overall alignment score (0–100). 0 being absolutely no alignment, 100 being perfect alignment.
 - A one-sentence summary of their integrity today
 - A one-sentence flag if any avoidance, weakness, or drift is detected
+- A regret forecast. If you notice the user is giving excuses, you can state something like "If you continue making excuses like [excuse] then in 30 days your life will look like..."
 
 Your response should be valid json in this format:
 {
   "score": number,
   "summary": string,
-  "flag": string | null
+  "flag": string | null,
+  "regretForecast": string | null
 }
 
 The user's personal values: ${personalValues}
@@ -53,18 +55,6 @@ export const POST = (req: Request): Promise<Response> => {
       console.error('Got an error trying to work with OpenAI:', error)
       throw new Error(error)
     })
-}
-
-const isReplyGood = (chatGptReply?: string): boolean => {
-  // No reply from chatGpt. That's a Bad reply.
-  if (!chatGptReply) return false
-
-  const parsedChatGptReply = JSON.parse(chatGptReply)
-  if (typeof parsedChatGptReply.score === 'number' && typeof parsedChatGptReply.summary === 'string') {
-    return true
-  } else {
-    return false
-  }
 }
 
 // Recursive fetch with retry logic
@@ -116,3 +106,16 @@ const fetchCompletion = (prompt: string, attempt = 1): Promise<string | undefine
       // No more attempts left. Give up
       return Promise.reject(err)
     })
+
+// Gauges whether the reply from chatGpt is good or not
+const isReplyGood = (chatGptReply?: string): boolean => {
+  // No reply from chatGpt. That's a Bad reply.
+  if (!chatGptReply) return false
+
+  const parsedChatGptReply = JSON.parse(chatGptReply)
+  if (typeof parsedChatGptReply.score === 'number' && typeof parsedChatGptReply.summary === 'string') {
+    return true
+  } else {
+    return false
+  }
+}

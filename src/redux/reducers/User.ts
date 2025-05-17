@@ -3,7 +3,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 export interface DailyReflectionData {
   score: number
   summary: string
-  flag?: string
+  flag: string | null
+  regretForecast: string | null
 }
 
 export interface UserState {
