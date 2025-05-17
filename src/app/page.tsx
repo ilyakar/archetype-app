@@ -229,10 +229,10 @@ export default function Home() {
         </Alert>
       )}
       <div className="d-flex flex-column reset-buttons-container">
-        <Button variant="outline-secondary" onClick={_onResetPersonalValuesPress}>
+        <Button variant="outline-secondary" size="sm" onClick={_onResetPersonalValuesPress}>
           Reset Personal Values
         </Button>
-        <Button variant="secondary" onClick={_onResetDailyReflectionPress}>
+        <Button variant="secondary" size="sm" onClick={_onResetDailyReflectionPress}>
           Reset Daily Reflection
         </Button>
       </div>
