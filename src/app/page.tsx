@@ -115,6 +115,11 @@ export default function Home() {
     })
       .then(res => res.json())
       .then(openAiIsGoodAnswerAnalysis => {
+        // If we got an error
+        if (openAiIsGoodAnswerAnalysis.error) {
+          throw new Error(openAiIsGoodAnswerAnalysis.error.message)
+        }
+
         // Answer passed (score at least 30/100), great!
         if (openAiIsGoodAnswerAnalysis?.answerScore >= 30) {
           return true
@@ -206,6 +211,11 @@ export default function Home() {
     })
       .then(res => res.json())
       .then(openAiReflectionData => {
+        // If we got an error
+        if (openAiReflectionData.error) {
+          throw new Error(openAiReflectionData.error.message)
+        }
+
         dispatch(
           updateUser({
             dailyReflectionData: openAiReflectionData,

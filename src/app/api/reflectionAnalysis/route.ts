@@ -53,7 +53,7 @@ export const POST = (req: Request): Promise<Response> => {
     })
     .catch(error => {
       console.error('Got an error trying to work with OpenAI:', error)
-      throw new Error(error)
+      return NextResponse.json(error)
     })
 }
 
