@@ -8,7 +8,7 @@ A self-reflection web app built with Next.js, React, and Redux. Users can enter 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/reflection-app.git
+   git clone https://github.com/ilyakar/archetype-reflection-web-app
    cd reflection-app
 ````
 
