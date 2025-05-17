@@ -102,7 +102,6 @@ export default function Home() {
   }
 
   const isAnswerGood = ({ question, answer }: { question: string; answer: string }): Promise<boolean> => {
-    setLoading(true)
     setError('')
 
     return fetch('/api/isGoodAnswerAnalysis', {
@@ -116,22 +115,19 @@ export default function Home() {
     })
       .then(res => res.json())
       .then(openAiIsGoodAnswerAnalysis => {
-        // Answer passed, great!
-        if (openAiIsGoodAnswerAnalysis?.questionPassed) {
+        // Answer passed (score at least 30/100), great!
+        if (openAiIsGoodAnswerAnalysis?.answerScore >= 30) {
           return true
         }
         // Answer didn't pass. Explain why in error
         else {
-          setError(openAiIsGoodAnswerAnalysis?.questionFailedSummary)
+          setError(openAiIsGoodAnswerAnalysis?.answerFailedSummary)
           return false
         }
       })
       .catch((error: { message: string }) => {
         setError(`Oops. Got an error: ${error.message}`)
         return false
-      })
-      .finally(() => {
-        setLoading(false)
       })
   }
 
@@ -191,7 +187,7 @@ export default function Home() {
       question: 'Where did you face resistance today, and how did you respond',
       answer: dailyReflectionResponse2
     }).then((passed: boolean) => {
-      setCheckingDailyResponse2(true)
+      setCheckingDailyResponse2(false)
 
       if (passed) {
         submitAllDataToOpenAIForReflectionAnalysis()
@@ -200,7 +196,7 @@ export default function Home() {
   }
 
   const submitAllDataToOpenAIForReflectionAnalysis = () => {
-    setLoading(true)
+    setCheckingDailyResponse2(true)
     setError('')
 
     fetch('/api/reflectionAnalysis', {
@@ -221,7 +217,7 @@ export default function Home() {
         setError(`Oops. Got an error: ${error.message}`)
       })
       .finally(() => {
-        setLoading(false)
+        setCheckingDailyResponse2(false)
       })
   }
 
@@ -256,7 +252,10 @@ export default function Home() {
               />
             </Form.Group>
             <div className="d-flex mt-4">
-              <Button variant="outline-primary" onClick={_onPersonalValuesSavePress}>
+              <Button
+                variant={personalValuesLocal == personalValues ? 'outline-secondary' : 'outline-primary'}
+                disabled={personalValuesLocal == personalValues ? true : false}
+                onClick={_onPersonalValuesSavePress}>
                 {checkingPersonalValues ? <Spinner size="sm" animation="border" variant="primary" style={{ marginTop: 2 }} /> : <>Save</>}
               </Button>
             </div>

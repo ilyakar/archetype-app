@@ -45,13 +45,13 @@ ${personalValues}`
 ${userData}
 -----------
 
-- If the user's answer looks thoughtful then questionPassed should be true. If it looks like the user is just trying to brush off the task, then output false. Note: you are not gauging how well the answer aligns with the personal values. You are just assessing whether the user has put thought into their answer.
-- If questionPassed is false, provide a 1-sentence questionFailedSummary of why you believe the answer doesn't possess enough reflection. Should be written as if talking with the user "Your answer..."
+- Gauge how thoughtful the user's answer is. If it's very thoughtful give a score of 100. If it looks like the user is just trying to brush off the task, then give a score of 0. Note: you are not gauging how well the answer aligns with the personal values. You are just assessing whether the user has put thought into their answer.
+- If the question score is <30%, provide a 1-sentence answerFailedSummary of why you believe the answer doesn't possess enough reflection. Should be written as if talking with the user "Your answer..."
 
 Your response should be valid json in this format:
 {
-  "questionPassed": boolean,
-  "questionFailedSummary": string | null
+  "answerScore": number,
+  "answerFailedSummary": string | null
 }`
 }
 
@@ -77,18 +77,6 @@ export const POST = (req: Request): Promise<Response> => {
       console.error('Got an error trying to work with OpenAI:', error)
       throw new Error(error)
     })
-}
-
-const isReplyGood = (chatGptReply?: string): boolean => {
-  // No reply from chatGpt. That's a Bad reply.
-  if (!chatGptReply) return false
-
-  const parsedChatGptReply = JSON.parse(chatGptReply)
-  if (typeof parsedChatGptReply.questionPassed === 'boolean' && typeof parsedChatGptReply.questionFailedSummary === 'string') {
-    return true
-  } else {
-    return false
-  }
 }
 
 // Recursive fetch with retry logic
@@ -121,12 +109,16 @@ const fetchCompletion = (prompt: string, attempt = 1): Promise<string | undefine
       // -----
       // We have more attempts, let's try to get another response
       if (attempt < MAX_TRIES) {
-        console.info(`Attempt #${attempt} produced an invalid reply. Retrying …`)
+        console.info(`Attempt #${attempt} produced an invalid reply:
+${chatGptReply}.
+
+Retrying …`)
         return fetchCompletion(prompt, attempt + 1)
       }
       // No more attempts left. We give up.
       else {
-        console.info(`Attempt #${attempt} is the last try. Returning whatever we got.`)
+        console.info(`Attempt #${attempt} is the last try. Returning whatever we got:
+${chatGptReply}`)
         return chatGptReply // may be undefined or invalid JSON, but we give up
       }
     })
@@ -140,3 +132,33 @@ const fetchCompletion = (prompt: string, attempt = 1): Promise<string | undefine
       // No more attempts left. Give up
       return Promise.reject(err)
     })
+
+const isReplyGood = (chatGptReply?: string): boolean => {
+  // No reply from chatGpt. That's a Bad reply.
+  if (!chatGptReply) return false
+
+  const parsedChatGptReply = JSON.parse(chatGptReply)
+
+  // If we got the answerScore correctly from ChatGPT, great!
+  if (parsedChatGptReply.answerScore >= 0 && parsedChatGptReply.answerScore <= 100) {
+    // The answerScore is 30 or more, means the answer is good. All good, we need nothing more.
+    if (parsedChatGptReply.answerScore >= 30) {
+      return true
+    }
+
+    // The answerScore is low. If ChatGPT provided an answerFailedSummary
+    else if (parsedChatGptReply.answerScore < 30 && typeof parsedChatGptReply.answerFailedSummary === 'string') {
+      return true
+    }
+
+    // The answerScore is low. But ChatGPT didn't provide an answerFailedSummary. Fail
+    else {
+      return false
+    }
+  }
+
+  // Didn't get an answer score from ChatGPT. Fail.
+  else {
+    return false
+  }
+}
