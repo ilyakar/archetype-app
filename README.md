@@ -7,24 +7,30 @@ A self-reflection web app built with Next.js, React, and Redux. Users can enter 
 ## 🚀 Setup Instructions
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ilyakar/archetype-reflection-web-app
-   cd archetype-reflection-web-app
-````
+
+```bash
+git clone https://github.com/ilyakar/archetype-reflection-web-app
+cd archetype-reflection-web-app
+```
 
 2. **Install dependencies**
 
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
 
-3. **Run the development server**
+3. **Add OpenAI key**
 
-   ```bash
-   npm run dev
-   ```
+Create a file in the root folder name .env.local.
+Inside, place the following: OPENAI_API_KEY_LOCAL=[your-openai-api-key-here]
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. **Run the development server**
+
+```bash
+npm run dev
+```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
