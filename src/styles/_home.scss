@@ -1,0 +1,277 @@
+@import 'variables';
+@import 'typography'; // For text-label, headings, etc.
+@import 'layout';     // For container, etc.
+@import 'buttons';    // For .gradient-button
+
+// Site Header
+.site-header {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+
+  &__logo {
+    color: $color-accent-primary;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+  }
+}
+
+// Hero Section
+.hero-section {
+  height: 80vh;
+  background: linear-gradient(104deg, #000 17.17%, #0F1022 102.38%);
+  box-shadow: 0px 15px 60px 0px rgba(0, 0, 0, 0.50);
+
+  &__content {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+    height: 100%;
+
+    @media (min-width: $bp-large) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &__image {
+    width: auto;
+    height: 100%;
+  }
+
+  &__text-content {
+    text-align: center;
+    
+    @media (min-width: $bp-large) {
+      text-align: left;
+    }
+  }
+
+  &__title {
+    font-size: 2.5rem; // text-4xl
+    font-weight: 700; // font-bold
+    color: $color-text-light;
+    margin-bottom: 2rem;
+    line-height: 1.2;
+
+    @media (min-width: $bp-large) {
+      font-size: 3.125rem; // lg:text-5xl
+    }
+  }
+}
+
+// Social Proof Section
+.social-proof {
+  background-image: linear-gradient(to right, $color-dark-bg-mid, rgba($color-accent-secondary, 0.2));
+  text-align: center;
+
+  &__heading {
+    margin-bottom: 1rem;
+  }
+  &__heading-main {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: $color-text-light;
+     @media (min-width: $bp-large) {
+      font-size: 3.125rem;
+    }
+  }
+  &__heading-accent {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: $color-accent-secondary;
+     @media (min-width: $bp-large) {
+      font-size: 3.125rem;
+    }
+  }
+  &__subheading {
+    color: $color-text-medium;
+    margin-bottom: 0.5rem;
+  }
+  &__subheading-bottom {
+     color: $color-text-medium;
+    margin-bottom: 3rem;
+  }
+
+  &__grid {
+    display: grid;
+    gap: 1.5rem;
+    
+    @media (min-width: $bp-medium) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @media (min-width: $bp-large) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+
+.testimonial-card {
+  background-color: rgba($color-dark-bg-end, 0.5);
+  border: 1px solid rgba($color-accent-primary, 0.2);
+  backdrop-filter: blur(4px);
+  padding: 1.5rem;
+  text-align: center;
+  border-radius: 0.5rem; // rounded-lg
+
+  &__avatar {
+    border-radius: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1rem;
+  }
+  &__name {
+    color: $color-text-light;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  &__stars {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    svg {
+      height: 1rem;
+      width: 1rem;
+      fill: $color-star-yellow;
+      color: $color-star-yellow;
+    }
+  }
+  &__quote {
+    color: $color-text-medium;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+}
+
+// Product Section
+.product-section {
+  &__grid {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+    
+    @media (min-width: $bp-large) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  &__image-wrapper {
+    position: relative;
+  }
+  
+  &__text-content {
+    .text-label { // from _typography.scss
+      margin-bottom: 1rem;
+    }
+    .heading-xl { // from _typography.scss
+      margin-bottom: 1.5rem;
+    }
+    .paragraph--large { // from _typography.scss
+      margin-bottom: 2rem;
+    }
+  }
+}
+
+// Features Grid
+.features-grid {
+  display: grid;
+  gap: 3rem;
+  
+  @media (min-width: $bp-medium) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  &__item {
+    & > * + * {
+      margin-top: 1rem;
+    }
+    
+    .text-label { // from _typography.scss
+      margin-bottom: 0.5rem;
+    }
+    .heading-lg { // from _typography.scss
+      margin-bottom: 0.75rem;
+    }
+    .paragraph { // from _typography.scss
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Identity Recode Section
+.identity-recode {
+  background-image: linear-gradient(to bottom right, $color-dark-bg-start, $color-dark-bg-mid, rgba($color-accent-secondary, 0.3));
+  
+  &__grid {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+    
+    @media (min-width: $bp-large) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  &__image-wrapper {
+    position: relative;
+    img {
+      border-radius: 1rem; // rounded-2xl
+    }
+  }
+  
+  &__text-content {
+    .text-label { margin-bottom: 1rem; }
+    .heading-xl { margin-bottom: 1.5rem; }
+  }
+  
+  &__subheading {
+    color: $color-text-light;
+    font-size: 1.25rem; // text-xl
+    font-weight: 500; // font-medium
+    margin-bottom: 1.5rem;
+  }
+  
+  &__text-block {
+    & > * + * {
+      margin-top: 1rem;
+    }
+    color: $color-text-medium;
+    line-height: 1.6;
+  }
+  
+  &__button-wrapper {
+    margin-top: 2rem;
+  }
+}
+
+// Future Vision Section
+.future-vision {
+  max-width: 800px; // max-w-3xl
+  margin-left: auto;
+  margin-right: auto;
+  
+  & > * + * {
+    margin-top: 4rem;
+  }
+  
+  &__block {
+    .text-label { margin-bottom: 1rem; }
+    .heading-xl { margin-bottom: 1.5rem; }
+  }
+  
+  &__text-block {
+    & > * + * {
+      margin-top: 1rem;
+    }
+    color: $color-text-medium;
+    font-size: 1.125rem; // text-lg
+    line-height: 1.6;
+  }
+}
+
+// Final CTA
+.final-cta {
+  text-align: center;
+}

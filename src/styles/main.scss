@@ -1,0 +1,26 @@
+// This is a conceptual main SASS file.
+// You would compile this file to app/globals.css
+
+// 1. Variables (implicitly used by others, but good to list first)
+// @import 'variables'; // Not directly outputting CSS, but defines for others
+
+// 2. Base styles, resets
+@import 'base';
+
+// 3. Global typography
+@import 'typography';
+
+// 4. Global layout helpers
+@import 'layout';
+
+// 5. Global button styles
+@import 'buttons';
+
+// 6. Global components (like footer)
+@import 'footer';
+
+// 7. Page-specific styles
+@import 'home';
+@import 'choose-archetype';
+
+// Add other page-specific or component styles as needed

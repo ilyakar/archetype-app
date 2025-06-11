@@ -1,0 +1,359 @@
+@import 'variables';
+@import 'typography';
+@import 'layout';
+@import 'buttons';
+
+
+.choose-archetype-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.choose-archetype-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+
+  &__logo {
+    color: $color-accent-primary;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+  }
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background-color: rgba($color-dark-bg-end, 0.5);
+  border: 1px solid rgba($color-accent-primary, 0.2);
+  border-radius: 50%;
+  color: $color-text-light;
+  transition: all 0.2s ease;
+  text-decoration: none;
+
+  &:hover {
+    background-color: rgba($color-dark-bg-end, 0.8);
+    transform: scale(1.05);
+    text-decoration: none;
+  }
+
+  &__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+.choose-archetype-main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.choose-archetype-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: $color-text-light;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.appearance-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.gender-toggle {
+  display: flex;
+  background-color: rgba($color-dark-bg-end, 0.5);
+  border-radius: 2rem;
+  padding: 0.25rem;
+  border: 1px solid rgba($color-accent-primary, 0.2);
+
+  &__button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: $color-text-medium;
+    border-radius: 1.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+
+    &--active {
+      background-color: $color-accent-primary;
+      color: $color-text-light;
+    }
+  }
+}
+
+.skin-tone-selection {
+  display: flex;
+  gap: 0.5rem;
+  background-color: rgba($color-dark-bg-end, 0.5);
+  border-radius: 2rem;
+  padding: 0.5rem;
+  border: 1px solid rgba($color-accent-primary, 0.2);
+}
+
+.skin-tone-button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &--light {
+    background-color: #f5deb3; // Wheat
+  }
+
+  &--dark {
+    background-color: #8b4513; // SaddleBrown
+  }
+
+  &--active {
+    border-color: $color-accent-primary;
+    transform: scale(1.1);
+  }
+}
+
+.archetype-display-area {
+  position: relative;
+}
+
+.archetype-card {
+  background-color: rgba($color-dark-bg-end, 0.3);
+  border: 1px solid rgba($color-accent-primary, 0.2);
+  border-radius: 1rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-0.25rem);
+    border-color: rgba($color-accent-primary, 0.4);
+  }
+
+  &--selected {
+    border-color: $color-accent-primary;
+    background-color: rgba($color-dark-bg-end, 0.6);
+  }
+
+  &__image-wrapper {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+  }
+
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__content {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $color-text-light;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  &__description {
+    color: $color-text-medium;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+    font-size: 0.9rem;
+  }
+
+  &__details {
+    margin-top: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
+
+.archetype-details {
+  &__section {
+    margin-bottom: 1.5rem;
+  }
+
+  &__title {
+    color: $color-text-light;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.archetype-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.archetype-tag {
+  background-color: rgba($color-accent-primary, 0.2);
+  color: $color-accent-primary;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid rgba($color-accent-primary, 0.3);
+}
+
+.select-path-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 2px;
+  border-radius: 2rem;
+  font-weight: 500;
+  text-decoration: none;
+  overflow: hidden;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease-out;
+  margin-top: auto;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background-image: linear-gradient(to right, $color-accent-primary, $color-accent-secondary);
+    border-radius: inherit;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover::before {
+    opacity: 0.85;
+  }
+
+  &__content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $color-dark-bg-start;
+    color: $color-text-button;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: inherit;
+    z-index: 2;
+    transition: color 0.3s ease;
+    width: 100%;
+
+    &:hover {
+      color: $color-text-light;
+    }
+  }
+
+  &__icon {
+    margin-left: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    svg {
+      height: 1rem;
+      width: 1rem;
+    }
+  }
+}
+
+// Responsive Layout for Archetype Display
+.archetype-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); // 4 columns for desktop
+  gap: 2rem;
+  @media (max-width: $bp-large) { // Desktop small / iPad Landscape
+     grid-template-columns: repeat(4, 1fr); // Still 4 for iPad landscape
+  }
+  @media (max-width: $bp-medium) { // iPad Portrait
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: $bp-small) { // Mobile
+    display: none;
+  }
+}
+
+.archetype-carousel {
+  display: none; // Hidden by default
+  @media (max-width: $bp-small) { // Mobile
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+}
+
+.archetype-card--mobile { // Specific styles for card in carousel if needed
+  @media (max-width: $bp-small) {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 0.5rem; // Adjusted margin for tighter fit with buttons
+  }
+}
+
+.carousel-nav-button {
+  background-color: rgba($color-dark-bg-end, 0.6);
+  border: 1px solid rgba($color-accent-primary, 0.3);
+  color: $color-text-light;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+
+  &:hover {
+    background-color: rgba($color-accent-primary, 0.5);
+  }
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  &--prev {
+    // Position adjustments if needed, e.g. absolute positioning
+  }
+  &--next {
+    // Position adjustments if needed
+  }
+}

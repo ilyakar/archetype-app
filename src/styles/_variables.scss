@@ -1,0 +1,25 @@
+// Colors
+$color-dark-bg-start: #0a0b15;
+$color-dark-bg-mid: #232644;
+$color-dark-bg-end: #3a3d5e;
+
+$color-accent-primary: #4aa2f4; // Blueish
+$color-accent-secondary: #c216f9; // Purple
+$color-accent-green: #10b981; // Green for button icon, can adjust
+
+$color-text-light: #ffffff;
+$color-text-medium: #a9a9a9;
+$color-text-dark: #0a0b15;
+$color-text-button: #60a5fa; // Light blue for button text
+
+$color-star-yellow: #f59e0b;
+
+// Breakpoints
+$bp-small: 480px; // Added for mobile carousel
+$bp-medium: 768px;
+$bp-large: 1024px;
+$bp-xlarge: 1280px;
+
+// Font
+$font-primary: 'Inter', sans-serif; // Assuming Inter is used
+$font-serif-display: 'Georgia', serif; // For the hero heading

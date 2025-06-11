@@ -1,0 +1,47 @@
+@import 'variables';
+
+body {
+  font-family: var(--font-dm-sans), sans-serif;
+}
+
+h1, h2 {
+  font-family: var(--font-merriweather), serif;
+}
+
+.text-label {
+  color: $color-accent-primary;
+  font-size: 0.875rem; // text-sm
+  font-weight: 500; // font-medium
+  letter-spacing: 0.2em;
+  margin-bottom: 1rem;
+}
+
+.heading-xl {
+  font-size: 2.5rem; // text-4xl
+  font-weight: 700; // font-bold
+  margin-bottom: 1.5rem;
+  @media (min-width: $bp-large) {
+    font-size: 3.125rem; // lg:text-5xl
+  }
+}
+
+.heading-lg {
+  font-size: 2rem; // text-3xl
+  font-weight: 700;
+  margin-bottom: 1rem;
+   @media (min-width: $bp-large) {
+    font-size: 2.25rem; // lg:text-3xl
+  }
+}
+
+
+.paragraph {
+  font-size: 1rem;
+  line-height: 1.75;
+  margin-bottom: 1rem;
+  color: $color-text-medium;
+
+  &--large {
+    font-size: 1.125rem; // text-lg
+  }
+}

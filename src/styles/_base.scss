@@ -1,0 +1,40 @@
+@import 'variables';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-image: linear-gradient(to bottom, $color-dark-bg-start, $color-dark-bg-mid, $color-dark-bg-end);
+  color: $color-text-medium;
+  min-height: 100vh;
+  line-height: 1.6;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: $color-text-light;
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: $color-accent-primary;
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}

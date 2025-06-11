@@ -1,0 +1,22 @@
+@import 'variables';
+
+// Global Site Footer Styles
+.site-footer {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid $color-dark-bg-end;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    color: $color-text-medium;
+    font-size: 0.875rem; // text-sm
+    gap: 0.5rem;
+
+    @media (min-width: $bp-medium) {
+      flex-direction: row;
+    }
+  }
+}
