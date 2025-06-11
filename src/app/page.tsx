@@ -1,383 +1,293 @@
-'use client'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { ArrowRight, Star } from 'lucide-react'
 
-import { useState, useRef, useEffect } from 'react'
-import { Container, Button, Form, Alert, Spinner, Card } from 'react-bootstrap'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination, EffectCoverflow } from 'swiper/modules'
-import type { Swiper as SwiperType } from 'swiper'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import 'swiper/css/effect-coverflow'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-import 'bootstrap-icons/font/bootstrap-icons.css'
-import '@styles/reflectionPage.scss'
-import { updateUser, resetUser } from '@redux/reducers/User'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@redux/stores'
-import moment from 'moment'
-
-export default function Home() {
-  const [checkingPersonalValues, setCheckingPersonalValues] = useState(false)
-  const [checkingDailyResponse1, setCheckingDailyResponse1] = useState(false)
-  const [checkingDailyResponse2, setCheckingDailyResponse2] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [personalValuesLocal, setPersonalValuesLocal] = useState('')
-  const [error, setError] = useState('')
-  const [activeIndex, setActiveIndex] = useState(0)
-  const swiperRef = useRef<SwiperType | null>(null)
-  const dispatch = useDispatch()
-  const personalValues = useSelector((state: RootState) => state.User.personalValues)
-  const dailyReflectionResponse1 = useSelector((state: RootState) => state.User.dailyReflectionResponse1)
-  const dailyReflectionResponse2 = useSelector((state: RootState) => state.User.dailyReflectionResponse2)
-  const dailyReflectionData = useSelector((state: RootState) => state.User.dailyReflectionData)
-  const dailyReflectionSubmittedDate = useSelector((state: RootState) => state.User.dailyReflectionSubmittedDate)
-
-  const isValidLength = (text: string) => text.trim().split(/\s+/).length >= 20
-
-  // On page load, if we have personalValues saved, set them locally so that the textArea will show them
-  useEffect(() => {
-    setPersonalValuesLocal(personalValues)
-  }, [personalValues])
-
-  // Auto-hide the error alert
-  useEffect(() => {
-    if (error) {
-      const timeout = setTimeout(() => {
-        setError('')
-      }, 10000)
-
-      return () => clearTimeout(timeout)
-    }
-  }, [error])
-
-  const _onPersonalValuesChange = (personalValuesLocal: string) => {
-    setPersonalValuesLocal(personalValuesLocal)
-  }
-
-  const _onDailyReflectionResponse1Change = (response1: string) => {
-    dispatch(updateUser({ dailyReflectionResponse1: response1 }))
-  }
-
-  const _onDailyReflectionResponse2Change = (response2: string) => {
-    dispatch(updateUser({ dailyReflectionResponse2: response2 }))
-  }
-
-  const _onResetPersonalValuesPress = () => {
-    dispatch(
-      updateUser({
-        personalValues: ''
-      })
-    )
-
-    setActiveIndex(0)
-  }
-
-  const _onResetDailyReflectionPress = () => {
-    dispatch(
-      updateUser({
-        dailyReflectionResponse1: '',
-        dailyReflectionResponse2: '',
-        dailyReflectionSubmittedDate: undefined,
-        dailyReflectionData: undefined
-      })
-    )
-
-    setActiveIndex(0)
-  }
-
-  const shouldShowDailyReflectionSummary = () => {
-    const hasValidOpenAiReflectionData =
-      dailyReflectionData && typeof dailyReflectionData.score === 'number' && typeof dailyReflectionData.summary === 'string'
-    const lastReflectionSubmittedInPast24Hours = moment().diff(dailyReflectionSubmittedDate, 'hours') < 24
-
-    // We have valid openAi reflection data + we submitted last reflection in the past day
-    if (hasValidOpenAiReflectionData && lastReflectionSubmittedInPast24Hours) {
-      return true
-    }
-
-    // Nope. So show the daily reflection forms
-    else {
-      return false
-    }
-  }
-
-  const isAnswerGood = ({ question, answer }: { question: string; answer: string }): Promise<boolean> => {
-    setError('')
-
-    return fetch('/api/isGoodAnswerAnalysis', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        question: question,
-        userResponse: answer,
-        personalValues: personalValues
-      })
-    })
-      .then(res => res.json())
-      .then(openAiIsGoodAnswerAnalysis => {
-        // If we got an error
-        if (openAiIsGoodAnswerAnalysis.error) {
-          throw new Error(openAiIsGoodAnswerAnalysis.error.message)
-        }
-
-        // Answer passed (score at least 30/100), great!
-        if (openAiIsGoodAnswerAnalysis?.answerScore >= 30) {
-          return true
-        }
-        // Answer didn't pass. Explain why in error
-        else {
-          setError(openAiIsGoodAnswerAnalysis?.answerFailedSummary)
-          return false
-        }
-      })
-      .catch((error: { message: string }) => {
-        setError(`Oops. Got an error: ${error.message}`)
-        return false
-      })
-  }
-
-  const _onPersonalValuesSavePress = () => {
-    // If personal values text is too short
-    if (!isValidLength(personalValuesLocal)) {
-      return setError('Your personal values should be 20 words or more')
-    }
-
-    setCheckingPersonalValues(true)
-
-    isAnswerGood({
-      question: 'What are your personal values?',
-      answer: personalValuesLocal
-    }).then((passed: boolean) => {
-      setCheckingPersonalValues(false)
-
-      if (passed) {
-        dispatch(updateUser({ personalValues: personalValuesLocal }))
-      }
-    })
-  }
-
-  const _onDailyResponse1NextPress = () => {
-    // If dailyReflection1 response is too short
-    if (!isValidLength(dailyReflectionResponse1)) {
-      return setError('Your daily reflection response should be 20 words or more')
-    }
-
-    setCheckingDailyResponse1(true)
-
-    isAnswerGood({
-      question: 'Describe one decision you made today that reflects your personal values',
-      answer: dailyReflectionResponse1
-    }).then((passed: boolean) => {
-      setCheckingDailyResponse1(false)
-
-      if (passed) {
-        swiperRef.current?.slideNext()
-      }
-    })
-  }
-
-  const _onSubmitReflectionPress = () => {
-    // If dailyReflection1 response is too short
-    if (!isValidLength(dailyReflectionResponse1)) {
-      return setError('Your daily reflection response #1 should be 20 words or more')
-    }
-    // If dailyReflection2 response is too short
-    else if (!isValidLength(dailyReflectionResponse2)) {
-      return setError('Your daily reflection response #2 should be 20 words or more')
-    }
-
-    setCheckingDailyResponse2(true)
-
-    isAnswerGood({
-      question: 'Where did you face resistance today, and how did you respond',
-      answer: dailyReflectionResponse2
-    }).then((passed: boolean) => {
-      setCheckingDailyResponse2(false)
-
-      if (passed) {
-        submitAllDataToOpenAIForReflectionAnalysis()
-      }
-    })
-  }
-
-  const submitAllDataToOpenAIForReflectionAnalysis = () => {
-    setCheckingDailyResponse2(true)
-    setError('')
-
-    fetch('/api/reflectionAnalysis', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ personalValues, dailyReflectionResponse1, dailyReflectionResponse2 })
-    })
-      .then(res => res.json())
-      .then(openAiReflectionData => {
-        // If we got an error
-        if (openAiReflectionData.error) {
-          throw new Error(openAiReflectionData.error.message)
-        }
-
-        dispatch(
-          updateUser({
-            dailyReflectionData: openAiReflectionData,
-            dailyReflectionSubmittedDate: new Date()
-          })
-        )
-      })
-      .catch((error: { message: string }) => {
-        setError(`Oops. Got an error: ${error.message}`)
-      })
-      .finally(() => {
-        setCheckingDailyResponse2(false)
-      })
-  }
-
+export default function Component() {
   return (
-    <>
-      {error && (
-        <Alert variant="danger" className="error-alert shadow-sm text-white" onClick={() => setError('')} style={{ cursor: 'pointer' }}>
-          {error}
-        </Alert>
-      )}
-      <div className="d-flex flex-column reset-buttons-container">
-        <Button variant="outline-secondary mb-2" size="sm" onClick={_onResetPersonalValuesPress}>
-          Reset Personal Values
-        </Button>
-        <Button variant="secondary" size="sm" onClick={_onResetDailyReflectionPress}>
-          Reset Daily Reflection
-        </Button>
-      </div>
-      <div className="hero">
-        <Container className="py-5" style={{ maxWidth: '600px' }}>
-          <h2 className="mb-3">Profile 🏡</h2>
-          <Card className="card-plain mb-5">
-            <h5>What are your personal values?</h5>
-            <Form.Group className="input-group input-group-outline">
-              <Form.Control
-                as="textarea"
-                placeholder="Please describe in 2-3 sentences"
-                rows={4}
-                value={personalValuesLocal}
-                onChange={e => _onPersonalValuesChange(e.target.value)}
-                isInvalid={!isValidLength(personalValuesLocal)}
-              />
-            </Form.Group>
-            <div className="d-flex mt-4">
-              <Button
-                variant={personalValuesLocal == personalValues ? 'outline-secondary' : 'outline-primary'}
-                disabled={personalValuesLocal == personalValues ? true : false}
-                onClick={_onPersonalValuesSavePress}>
-                {checkingPersonalValues ? <Spinner size="sm" animation="border" variant="primary" style={{ marginTop: 2 }} /> : <>Save</>}
-              </Button>
+    <div className="min-h-screen bg-gradient-to-b from-bg-primary via-bg-secondary to-bg-tertiary">
+      {/* Header */}
+      <header className="flex justify-center pt-8 pb-16">
+        <div className="text-accent-blue text-sm font-medium tracking-[0.2em]">ARCHETYPE</div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative px-4 pb-32">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="relative">
+              <Image src="/placeholder.svg?height=400&width=500" alt="Four hooded figures" width={500} height={400} className="w-full h-auto" />
             </div>
-          </Card>
-        </Container>
-      </div>
+            <div className="text-center lg:text-left">
+              <h1 className="text-4xl lg:text-5xl font-bold text-primary mb-8 leading-tight font-serif">
+                Meet your version who never breaks a promise
+              </h1>
+              <button className="relative inline-flex items-center justify-center p-0.5 rounded-full group">
+                <span className="absolute inset-0 bg-gradient-to-r from-accent-blue to-accent-green rounded-full transition-all duration-300 group-hover:opacity-75" />
+                <span className="relative flex items-center bg-bg-primary text-text-accent hover:text-primary px-8 py-3 rounded-full text-lg font-medium transition-all duration-300">
+                  Begin My Initiation
+                  <span className="ml-3 flex items-center justify-center bg-accent-green rounded-full h-7 w-7">
+                    <ArrowRight className="h-4 w-4 text-bg-primary" />
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <div className="daily-reflection-container">
-        {!personalValues && <div className="daily-reflection-blocker" />}
-        <Container className="py-5" style={{ maxWidth: '600px' }}>
-          <h2 className="mb-5">Daily Reflection 🧐</h2>
+      {/* Social Proof Section */}
+      <section className="px-4 py-16 bg-gradient-to-r from-bg-secondary to-accent-purple/20">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="mb-4">
+            <span className="text-4xl lg:text-5xl font-bold text-primary">70,000+ </span>
+            <span className="text-4xl lg:text-5xl font-bold text-accent-purple">Heroes</span>
+          </div>
+          <p className="text-text-secondary mb-4">Have already begun their path.</p>
+          <p className="text-text-secondary mb-12">Don't fall behind.</p>
 
-          {!shouldShowDailyReflectionSummary() && (
-            <>
-              <Swiper
-                modules={[Pagination, EffectCoverflow]}
-                effect="coverflow"
-                spaceBetween={30}
-                slidesPerView={1}
-                className="mb-4"
-                onSwiper={swiper => (swiperRef.current = swiper)}
-                onSlideChange={swiper => setActiveIndex(swiper.activeIndex)}
-                allowTouchMove={false}>
-                <SwiperSlide className="reflection-slide">
-                  <Card className="shadow-sm p-3">
-                    <Card.Body>
-                      <Card.Title className="mb-4">Describe one decision you made today that reflects your personal values:</Card.Title>
-                      <Form.Group className="input-group input-group-outline">
-                        <Form.Control
-                          as="textarea"
-                          placeholder="Today I made the following decision..."
-                          rows={4}
-                          value={dailyReflectionResponse1}
-                          onChange={e => _onDailyReflectionResponse1Change(e.target.value)}
-                          isInvalid={!isValidLength(dailyReflectionResponse1)}
-                        />
-                      </Form.Group>
-                    </Card.Body>
-                  </Card>
-                </SwiperSlide>
-
-                <SwiperSlide>
-                  <Card className="shadow-sm p-3">
-                    <Card.Body>
-                      <Card.Title className="mb-4">Where did you face resistance today, and how did you respond:</Card.Title>
-                      <Form.Group className="input-group input-group-outline">
-                        <Form.Control
-                          as="textarea"
-                          placeholder="Today I faced resistance when... I responded by..."
-                          rows={4}
-                          value={dailyReflectionResponse2}
-                          onChange={e => _onDailyReflectionResponse2Change(e.target.value)}
-                          isInvalid={!isValidLength(dailyReflectionResponse2)}
-                        />
-                      </Form.Group>
-                    </Card.Body>
-                  </Card>
-                </SwiperSlide>
-              </Swiper>
-
-              {activeIndex === 0 && (
-                <div className="d-flex justify-content-end mt-4">
-                  <Button variant="primary" onClick={_onDailyResponse1NextPress}>
-                    {checkingDailyResponse1 ? (
-                      <Spinner size="sm" animation="border" variant="light" style={{ marginTop: 2 }} />
-                    ) : (
-                      <>
-                        Next <i className="bi bi-chevron-right" />
-                      </>
-                    )}
-                  </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-bg-tertiary/50 border-accent-blue/20 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <Image src="/placeholder.svg?height=60&width=60" alt="Amanda Tapping" width={60} height={60} className="rounded-full mx-auto mb-4" />
+                <h3 className="text-primary font-medium mb-2">Amanda Tapping</h3>
+                <div className="flex justify-center mb-3">
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
                 </div>
-              )}
+                <p className="text-text-secondary text-sm leading-relaxed">
+                  This is a life-changing app. I have become a much better person after 4 weeks.
+                </p>
+              </CardContent>
+            </Card>
 
-              {activeIndex === 1 && (
-                <div className="d-flex justify-content-between mt-4">
-                  <Button variant="outline-secondary" onClick={() => swiperRef.current?.slidePrev()}>
-                    <i className="bi bi-chevron-left" /> Back
-                  </Button>
-
-                  <Button variant="success" onClick={_onSubmitReflectionPress}>
-                    {checkingDailyResponse2 ? (
-                      <Spinner size="sm" animation="border" variant="light" style={{ marginTop: 2 }} />
-                    ) : (
-                      <>
-                        Submit Reflection <i className="bi bi-chevron-right" />
-                      </>
-                    )}
-                  </Button>
+            <Card className="bg-bg-tertiary/50 border-accent-blue/20 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <Image src="/placeholder.svg?height=60&width=60" alt="Joe Dispenza" width={60} height={60} className="rounded-full mx-auto mb-4" />
+                <h3 className="text-primary font-medium mb-2">Joe Dispenza</h3>
+                <div className="flex justify-center mb-3">
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
                 </div>
-              )}
-            </>
-          )}
+                <p className="text-text-secondary text-sm leading-relaxed">
+                  This is motivation at a whole new level. It's my go-to first practice every day.
+                </p>
+              </CardContent>
+            </Card>
 
-          {shouldShowDailyReflectionSummary() && (
-            <>
-              <p>
-                <strong>Alignment Score:</strong> {dailyReflectionData!.score}/100
+            <Card className="bg-bg-tertiary/50 border-accent-blue/20 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <Image src="/placeholder.svg?height=60&width=60" alt="Leonard Nimoy" width={60} height={60} className="rounded-full mx-auto mb-4" />
+                <h3 className="text-primary font-medium mb-2">Leonard Nimoy</h3>
+                <div className="flex justify-center mb-3">
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                </div>
+                <p className="text-text-secondary text-sm leading-relaxed">Such gamification for a life coach I've said. So rewarding. Wow.</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-bg-tertiary/50 border-accent-blue/20 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <Image src="/placeholder.svg?height=60&width=60" alt="Jim Carrey" width={60} height={60} className="rounded-full mx-auto mb-4" />
+                <h3 className="text-primary font-medium mb-2">Jim Carrey</h3>
+                <div className="flex justify-center mb-3">
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                  <Star className="h-4 w-4 fill-star text-star" />
+                </div>
+                <p className="text-text-secondary text-sm leading-relaxed">I needed this so much but I am very glad it has made me.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Product Section */}
+      <section className="px-4 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="relative">
+              <div className="bg-gradient-to-br from-bg-secondary to-accent-purple/30 rounded-2xl p-8 backdrop-blur-sm border-accent-blue/20 border-[] px-0 py-[0]">
+                <Image
+                  src="/placeholder.svg?height=300&width=250"
+                  alt="Hooded figure"
+                  width={250}
+                  height={300}
+                  className="w-full h-auto rounded-lg"
+                />
+              </div>
+            </div>
+            <div>
+              <p className="text-accent-blue text-sm font-medium tracking-[0.2em] mb-4">BECOME THE PERSON YOU SWORE TO BE</p>
+              <h2 className="text-4xl lg:text-5xl font-bold text-primary mb-6">ARCHETYPE</h2>
+              <p className="text-text-secondary text-lg mb-8 leading-relaxed">
+                An AI-powered system that holds you ruthlessly accountable to your future self and connects you with others on the same path.
               </p>
-              <p>
-                <strong>Summary:</strong> {dailyReflectionData!.summary}
+              <button className="relative inline-flex items-center justify-center p-0.5 rounded-full group">
+                <span className="absolute inset-0 bg-gradient-to-r from-accent-blue to-accent-green rounded-full transition-all duration-300 group-hover:opacity-75" />
+                <span className="relative flex items-center bg-bg-primary text-text-accent hover:text-primary px-8 py-3 rounded-full text-lg font-medium transition-all duration-300">
+                  Begin My Initiation
+                  <span className="ml-3 flex items-center justify-center bg-accent-green rounded-full h-7 w-7">
+                    <ArrowRight className="h-4 w-4 text-bg-primary" />
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="px-4 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12">
+            <div className="space-y-4">
+              <p className="text-accent-blue text-sm font-medium tracking-[0.2em]">IDENTITY RITUAL</p>
+              <h3 className="text-2xl lg:text-3xl font-bold text-primary">Create your Archetype</h3>
+              <p className="text-text-secondary leading-relaxed">
+                Define your unique values, rituals, and rules. Select the template. Forge your ideal future self.
               </p>
-              <p>
-                <strong>Flag:</strong> {dailyReflectionData!.flag || 'None'}
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-accent-blue text-sm font-medium tracking-[0.2em]">DAILY TRUTH</p>
+              <h3 className="text-2xl lg:text-3xl font-bold text-primary">Track your Alignment</h3>
+              <p className="text-text-secondary leading-relaxed">
+                A number that rises with discipline and drops with deviation. No excuses. Just evidence.
               </p>
-              <p>
-                <strong>Regret Corecast:</strong> {dailyReflectionData!.regretForecast || 'None'}
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-accent-blue text-sm font-medium tracking-[0.2em]">FUTURE SELF</p>
+              <h3 className="text-2xl lg:text-3xl font-bold text-primary">Talk to your future self</h3>
+              <p className="text-text-secondary leading-relaxed">
+                Use advanced AI to have conversations with your accountable, future self. You choose, and predicts regret. It answers. What would the
+                person I swore to become do?
               </p>
-            </>
-          )}
-        </Container>
-      </div>
-    </>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-accent-blue text-sm font-medium tracking-[0.2em]">ASCENSION</p>
+              <h3 className="text-2xl lg:text-3xl font-bold text-primary">Unlock deeper versions</h3>
+              <p className="text-text-secondary leading-relaxed">
+                As your alignment score rises and crosses each discipline threshold, you unlock stricter rituals, deeper rules, and Archetype
+                transformation.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-accent-blue text-sm font-medium tracking-[0.2em]">PUBLIC PROOF</p>
+              <h3 className="text-2xl lg:text-3xl font-bold text-primary">Prove alignment</h3>
+              <p className="text-text-secondary leading-relaxed">
+                Share your Discipline Profile. No followers, no clout, no easy dopamine. Just your values, visible.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-accent-blue text-sm font-medium tracking-[0.2em]">SOCIAL LAYER</p>
+              <h3 className="text-2xl lg:text-3xl font-bold text-primary">Connect by value</h3>
+              <p className="text-text-secondary leading-relaxed">
+                Later, connect with others, not by who they know, but by the standards they live by.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Identity Recode Section */}
+      <section className="px-4 py-20 bg-gradient-to-br from-bg-primary via-bg-secondary to-accent-purple/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="relative">
+              <Image
+                src="/placeholder.svg?height=500&width=400"
+                alt="People walking toward light with network pattern"
+                width={400}
+                height={500}
+                className="w-full h-auto rounded-2xl"
+              />
+            </div>
+            <div>
+              <p className="text-accent-blue text-sm font-medium tracking-[0.2em] mb-4">IDENTITY RECODE</p>
+              <h2 className="text-4xl lg:text-5xl font-bold text-primary mb-6">A New Social Network</h2>
+              <p className="text-primary text-xl mb-6 font-medium">Built on character. Not Clout.</p>
+
+              <div className="space-y-4 text-text-secondary leading-relaxed">
+                <p>Soon, Archetype will become a global graph of discipline, alignment, and spiritual integrity.</p>
+                <p>No likes. No followers. No vanity metrics.</p>
+                <p>You won't follow influencers.</p>
+                <p>You'll meet Archetypes: real people, living by their values.</p>
+              </div>
+
+              <div className="mt-8">
+                <Button className="bg-transparent border-2 border-accent-blue text-accent-blue hover:bg-accent-blue hover:text-primary px-8 py-3 rounded-full text-lg font-medium transition-all duration-300">
+                  Begin My Initiation
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Future Vision & Invest Section */}
+      <section className="px-4 py-20">
+        <div className="max-w-3xl mx-auto space-y-16">
+          <div>
+            <p className="text-accent-blue text-sm font-medium tracking-[0.2em] mb-4">FATE</p>
+            <h2 className="text-4xl lg:text-5xl font-bold text-primary mb-6">Future Vision</h2>
+            <div className="space-y-4 text-text-secondary leading-relaxed text-lg">
+              <p>The first Archetypes are being forged now.</p>
+              <p>The first rituals. The first code enforcements.</p>
+              <p>Only those on this waitlist will enter before the gates close. You'll be part of the founding class.</p>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-accent-blue text-sm font-medium tracking-[0.2em] mb-4">INVEST</p>
+            <h2 className="text-4xl lg:text-5xl font-bold text-primary mb-6">Invest in yourself</h2>
+            <div className="space-y-4 text-text-secondary leading-relaxed text-lg">
+              <p>This isn't a product drop.</p>
+              <p>It's a promise to your future self.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="px-4 py-20 text-center">
+        <div className="max-w-2xl mx-auto">
+          <button className="relative inline-flex items-center justify-center p-0.5 rounded-full group">
+            <span className="absolute inset-0 bg-gradient-to-r from-accent-blue to-accent-green rounded-full transition-all duration-300 group-hover:opacity-75" />
+            <span className="relative flex items-center bg-bg-primary text-text-accent hover:text-primary px-12 py-4 rounded-full text-xl font-medium transition-all duration-300">
+              Begin My Initiation
+              <span className="ml-3 flex items-center justify-center bg-accent-green rounded-full h-8 w-8">
+                <ArrowRight className="h-5 w-5 text-bg-primary" />
+              </span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="px-4 py-8 border-t border-bg-tertiary">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-text-secondary text-sm">
+          <p>Archetype. Meet your version who never breaks a promise.</p>
+          <p>Copyright © 2025</p>
+        </div>
+      </footer>
+    </div>
   )
 }
