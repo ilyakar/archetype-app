@@ -7,6 +7,7 @@ const HomePage = () => {
   return (
     <>
       <section className="hero-section">
+        <Image className="logo" src="/logo.png" alt="Archetype Logo" width="178" height="24" />
         <div className="image-container">
           <Image src="/home-hero-characters.png" alt="Four Archetypes" width="500" height="500" />
         </div>
@@ -16,7 +17,7 @@ const HomePage = () => {
             <br />
             never breaks a promise
           </h1>
-          <Link href="/choose-archetype" className="button stroke green xl">
+          <Link href="/choose-archetype" className="button stroke green size-xl">
             <span className="button-content">
               Begin My Initiation
               <i className="fa-solid fa-circle-chevron-right"></i>

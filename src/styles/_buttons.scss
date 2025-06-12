@@ -13,30 +13,106 @@
     color: transparent;
     background-clip: text;
     -webkit-background-clip: text;
-    background-image: linear-gradient(to right, #3da8ff, #31e6b5);
-    gap: 1rem;
   }
 
   &.stroke {
-    background: #0A0B15;
-    border: 3px solid transparent;
-    border-radius: 1rem;
+    background: $color-black;
+    border: solid transparent;
     -webkit-text-fill-color: transparent;
-    border-radius: 1.25rem;
+
+    &.pink {
+      background: linear-gradient($color-black, $color-black) padding-box, linear-gradient(120deg, $color-super-blue, $color-super-pink) border-box;
+
+      .button-content {
+        background-image: linear-gradient(120deg, mix($color-super-pink, $color-super-blue, 15%), mix($color-super-pink, $color-super-blue, 85%));
+      }
+    }
 
     &.green {
-      background: linear-gradient(#0e0e1a, #0e0e1a) padding-box, linear-gradient(to right, #3da8ff, #31e6b5) border-box;
+      background: linear-gradient($color-black, $color-black) padding-box /* The static dark bg colour */, linear-gradient(120deg, $color-super-blue, $color-super-green) border-box /* The stroke gradient */;
+
+      .button-content {
+        background-image: linear-gradient(120deg, mix($color-super-green, $color-super-blue, 15%), mix($color-super-green, $color-super-blue, 85%)); // Gradient of the colour at 15% and 85% of the final colours
+      }
     }
   }
 
-  &.xl {
+  &.full {
+    .button-content {
+      color: $color-white;
+      padding: 3px; // Since the stroke buttons have a 3px border, this makes sure that without the border the buttons are the same size
+    }
+
+    &.pink {
+      background: linear-gradient(120deg, $color-bg-start, $color-super-pink);
+    }
+
+    &.green {
+      background: linear-gradient(120deg, $color-bg-start, $color-super-green);
+    }
+  }
+
+  &.size-xl {
     padding: 1.5rem 2.5rem;
-    gap: 1rem;
-    box-shadow: 0px 10px 30px 0px rgba(0, 0, 0, 0.50);
+    box-shadow: 0px 0.75rem 2rem 0px rgba(0, 0, 0, 0.50);
     font-size: 1.25rem;
+    border-radius: 1.25rem;
+    border-width: 3px;
+
+    .button-content {
+      gap: 1rem;
+    }
 
     i {
       font-size: 2rem;
+    }
+  }
+
+  &.size-l {
+    padding: 1.25rem 1.875rem;
+    box-shadow: 0px 0.5rem 1.625rem 0px rgba(0, 0, 0, 0.50);
+    font-size: 1.125rem;
+    border-radius: 1.125rem;
+    border-width: 2.75px;
+
+    .button-content {
+      gap: 0.75rem;
+    }
+
+    i {
+      font-size: 1.75rem;
+    }
+  }
+
+  &.size-m {
+    padding: 0.75rem 1.25rem;
+    box-shadow: 0px 0.3rem 1.4rem 0px rgba(0, 0, 0, 0.50);
+    font-size: 1rem;
+    border-radius: 1rem;
+    border-width: 2.5px;
+
+    .button-content {
+      gap: 0.625rem;
+    }
+
+    i {
+      font-size: 1.5rem;
+    }
+  }
+
+  &.size-s {
+    padding: 0.625rem 1rem;
+    box-shadow: 0px 0.2rem 1.3rem 0px rgba(0, 0, 0, 0.50);
+    font-size: 0.875rem;
+    border-radius: 0.75rem;
+    border-width: 2px;
+
+    .button-content {
+      gap: 0.5rem;
+    }
+
+    i {
+      font-size: 1.375rem;
     }
   }
 }

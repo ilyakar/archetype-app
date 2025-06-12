@@ -1,5 +1,19 @@
-@import '_variables'
+@import '_variables';
 
 .all-components-page-wrapper {
   padding: 5rem 0;
+}
+
+.button-showcase {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  padding: 2rem;
+
+  .button-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: flex-start;
+  }
 }
