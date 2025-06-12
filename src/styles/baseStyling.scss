@@ -1,8 +1,5 @@
-// This is a conceptual main SASS file.
-// You would compile this file to app/globals.css
-
-// 1. Variables (implicitly used by others, but good to list first)
-// @import 'variables'; // Not directly outputting CSS, but defines for others
+// Import all fontawsome icons
+@import '@fortawesome/fontawesome-free/css/all.min.css';
 
 // 2. Base styles, resets
 @import 'base';

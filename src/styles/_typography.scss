@@ -8,6 +8,10 @@ h1, h2 {
   font-family: var(--font-merriweather), serif;
 }
 
+h1 {
+  font-size: 3rem; // 48 px;
+}
+
 .text-label {
   color: $color-accent-primary;
   font-size: 0.875rem; // text-sm

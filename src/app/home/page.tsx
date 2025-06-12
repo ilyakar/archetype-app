@@ -1,31 +1,30 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Star } from 'lucide-react'
+import { ArrowRight, CircleArrowRight, Star } from 'lucide-react'
 import '@styles/homePage.scss'
 
 const HomePage = () => {
   return (
     <>
-      <header className="site-header">
-        <div className="site-header__logo">ARCHETYPE</div>
-      </header>
-
       <section className="hero-section">
-        <div className="hero-section__content">
-          <Image className="hero-section__image" src="/home-hero-characters.png" alt="Four Archetypes" width="500" height="500" />
-          <div className="hero-section__text-content">
-            <h1 className="hero-section__title">Meet your version who never breaks a promise</h1>
-            <Link href="/choose-archetype" className="gradient-button">
-              <span className="gradient-button__content">
-                Begin My Initiation
-                <span className="gradient-button__icon-wrapper">
-                  <ArrowRight />
-                </span>
-              </span>
-            </Link>
-          </div>
+        <div className="image-container">
+          <Image src="/home-hero-characters.png" alt="Four Archetypes" width="500" height="500" />
+        </div>
+        <div className="content">
+          <h1>
+            Meet your version who
+            <br />
+            never breaks a promise
+          </h1>
+          <Link href="/choose-archetype" className="button stroke green xl">
+            <span className="button-content">
+              Begin My Initiation
+              <i className="fa-solid fa-circle-chevron-right"></i>
+            </span>
+          </Link>
         </div>
       </section>
+
       {/* Social Proof Section */}
       <section className="social-proof section-padding">
         <div className="container">

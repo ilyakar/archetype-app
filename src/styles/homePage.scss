@@ -1,60 +1,32 @@
 @import '_variables';
 
-// Site Header
-.site-header {
-  display: flex;
-  justify-content: center;
-  padding-top: 2rem;
-  padding-bottom: 4rem;
-
-  &__logo {
-    color: $color-accent-primary;
-    font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-  }
-}
-
 // Hero Section
 .hero-section {
-  height: 80vh;
+  height: 85vh;
   background: linear-gradient(104deg, #000 17.17%, #0F1022 102.38%);
   box-shadow: 0px 15px 60px 0px rgba(0, 0, 0, 0.50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  &__content {
-    display: grid;
-    gap: 3rem;
+  .image-container {
+    width: 50%;
+    height: 100%;
+    display: flex;
     align-items: center;
-    height: 100%;
+    overflow: hidden;
 
-    @media (min-width: $bp-large) {
-      grid-template-columns: repeat(2, 1fr);
+    img {
+      width: 100%;
     }
   }
 
-  &__image {
-    width: auto;
-    height: 100%;
+  .content {
+    width: 50%;
   }
 
-  &__text-content {
-    text-align: center;
-    
-    @media (min-width: $bp-large) {
-      text-align: left;
-    }
-  }
-
-  &__title {
-    font-size: 2.5rem; // text-4xl
-    font-weight: 700; // font-bold
-    color: $color-text-light;
-    margin-bottom: 2rem;
-    line-height: 1.2;
-
-    @media (min-width: $bp-large) {
-      font-size: 3.125rem; // lg:text-5xl
-    }
+  h1 {
+    margin-bottom: 2.5rem;
   }
 }
 
