@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Merriweather, DM_Sans } from 'next/font/google'
-import '@styles/main.scss'
+import '@styles/baseStyling.scss'
 import Providers from './Providers'
 
 const merriweather = Merriweather({

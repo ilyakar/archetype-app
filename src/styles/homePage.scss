@@ -1,7 +1,4 @@
-@import 'variables';
-@import 'typography'; // For text-label, headings, etc.
-@import 'layout';     // For container, etc.
-@import 'buttons';    // For .gradient-button
+@import '_variables'
 
 // Site Header
 .site-header {

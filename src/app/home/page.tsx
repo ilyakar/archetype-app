@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, Star } from 'lucide-react'
 
-export default function Component() {
+const HomePage = () => {
   return (
     <>
       <header className="site-header">
@@ -228,3 +228,5 @@ const Testimonial = ({ name, image, quote, imageWidth = 60, imageHeight = 60 }: 
     </div>
   )
 }
+
+export default HomePage

@@ -1,51 +1,53 @@
-"use client"
+'use client'
 
-import Image from "next/image"
-import Link from "next/link"
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
-import { useState, useEffect } from "react"
+import '@styles/chooseArchetypePage.scss'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 const archetypesData = [
   {
-    id: "warrior",
-    name: "Warrior",
-    image: "/placeholder.svg?height=400&width=300",
-    description: "I will move through resistance like fire through a fog.",
-    coreValues: ["Courage", "Honor"],
-    coreRituals: ["Training", "Combat"],
+    id: 'warrior',
+    name: 'Warrior',
+    image: '/placeholder.svg?height=400&width=300',
+    description: 'I will move through resistance like fire through a fog.',
+    coreValues: ['Courage', 'Honor'],
+    coreRituals: ['Training', 'Combat']
   },
   {
-    id: "stoic",
-    name: "Stoic",
-    image: "/placeholder.svg?height=400&width=300",
-    description: "",
-    coreValues: ["Secrecy", "Devotion"],
-    coreRituals: ["Early Rise", "Meditation"],
+    id: 'stoic',
+    name: 'Stoic',
+    image: '/placeholder.svg?height=400&width=300',
+    description: '',
+    coreValues: ['Secrecy', 'Devotion'],
+    coreRituals: ['Early Rise', 'Meditation']
   },
   {
-    id: "strategist",
-    name: "Strategist",
-    image: "/placeholder.svg?height=400&width=300",
-    description: "I will observe what others miss. I will move when others stall.",
-    coreValues: ["Wisdom", "Patience"],
-    coreRituals: ["Analysis", "Planning"],
+    id: 'strategist',
+    name: 'Strategist',
+    image: '/placeholder.svg?height=400&width=300',
+    description: 'I will observe what others miss. I will move when others stall.',
+    coreValues: ['Wisdom', 'Patience'],
+    coreRituals: ['Analysis', 'Planning']
   },
   {
-    id: "shadow",
-    name: "Shadow",
-    image: "/placeholder.svg?height=400&width=300",
-    description: "I will disappear to evolve. I will return unrecognizable.",
-    coreValues: ["Mystery", "Transformation"],
-    coreRituals: ["Solitude", "Reflection"],
-  },
+    id: 'shadow',
+    name: 'Shadow',
+    image: '/placeholder.svg?height=400&width=300',
+    description: 'I will disappear to evolve. I will return unrecognizable.',
+    coreValues: ['Mystery', 'Transformation'],
+    coreRituals: ['Solitude', 'Reflection']
+  }
 ]
 
 export default function ChooseArchetypePage() {
-  const [selectedGender, setSelectedGender] = useState<"male" | "female">("male")
-  const [selectedSkinTone, setSelectedSkinTone] = useState<"light" | "dark">("light")
-  const [selectedArchetypeId, setSelectedArchetypeId] = useState<string | null>("stoic")
+  const [selectedGender, setSelectedGender] = useState<'male' | 'female'>('male')
+  const [selectedSkinTone, setSelectedSkinTone] = useState<'light' | 'dark'>('light')
+  const [selectedArchetypeId, setSelectedArchetypeId] = useState<string | null>('stoic')
   const [currentMobileIndex, setCurrentMobileIndex] = useState<number>(
-    archetypesData.findIndex((arch) => arch.id === "stoic"), // Start with Stoic selected
+    archetypesData.findIndex(arch => arch.id === 'stoic') // Start with Stoic selected
   )
 
   useEffect(() => {
@@ -54,11 +56,11 @@ export default function ChooseArchetypePage() {
   }, [currentMobileIndex])
 
   const handleNextMobile = () => {
-    setCurrentMobileIndex((prevIndex) => (prevIndex + 1) % archetypesData.length)
+    setCurrentMobileIndex(prevIndex => (prevIndex + 1) % archetypesData.length)
   }
 
   const handlePrevMobile = () => {
-    setCurrentMobileIndex((prevIndex) => (prevIndex - 1 + archetypesData.length) % archetypesData.length)
+    setCurrentMobileIndex(prevIndex => (prevIndex - 1 + archetypesData.length) % archetypesData.length)
   }
 
   const currentArchetypeForMobile = archetypesData[currentMobileIndex]
@@ -82,15 +84,13 @@ export default function ChooseArchetypePage() {
         <div className="appearance-selection">
           <div className="gender-toggle">
             <button
-              className={`gender-toggle__button ${selectedGender === "male" ? "gender-toggle__button--active" : ""}`}
-              onClick={() => setSelectedGender("male")}
-            >
+              className={`gender-toggle__button ${selectedGender === 'male' ? 'gender-toggle__button--active' : ''}`}
+              onClick={() => setSelectedGender('male')}>
               Male
             </button>
             <button
-              className={`gender-toggle__button ${selectedGender === "female" ? "gender-toggle__button--active" : ""}`}
-              onClick={() => setSelectedGender("female")}
-            >
+              className={`gender-toggle__button ${selectedGender === 'female' ? 'gender-toggle__button--active' : ''}`}
+              onClick={() => setSelectedGender('female')}>
               Female
             </button>
           </div>
@@ -98,13 +98,13 @@ export default function ChooseArchetypePage() {
           <div className="skin-tone-selection">
             <button
               aria-label="Select light skin tone"
-              className={`skin-tone-button skin-tone-button--light ${selectedSkinTone === "light" ? "skin-tone-button--active" : ""}`}
-              onClick={() => setSelectedSkinTone("light")}
+              className={`skin-tone-button skin-tone-button--light ${selectedSkinTone === 'light' ? 'skin-tone-button--active' : ''}`}
+              onClick={() => setSelectedSkinTone('light')}
             />
             <button
               aria-label="Select dark skin tone"
-              className={`skin-tone-button skin-tone-button--dark ${selectedSkinTone === "dark" ? "skin-tone-button--active" : ""}`}
-              onClick={() => setSelectedSkinTone("dark")}
+              className={`skin-tone-button skin-tone-button--dark ${selectedSkinTone === 'dark' ? 'skin-tone-button--active' : ''}`}
+              onClick={() => setSelectedSkinTone('dark')}
             />
           </div>
         </div>
@@ -113,20 +113,15 @@ export default function ChooseArchetypePage() {
         <div className="archetype-display-area">
           {/* Mobile Carousel View */}
           <div className="archetype-carousel">
-            <button
-              onClick={handlePrevMobile}
-              className="carousel-nav-button carousel-nav-button--prev"
-              aria-label="Previous archetype"
-            >
+            <button onClick={handlePrevMobile} className="carousel-nav-button carousel-nav-button--prev" aria-label="Previous archetype">
               <ChevronLeft />
             </button>
             <div
-              className={`archetype-card archetype-card--mobile ${selectedArchetypeId === currentArchetypeForMobile.id ? "archetype-card--selected" : ""}`}
-              onClick={() => setSelectedArchetypeId(currentArchetypeForMobile.id)}
-            >
+              className={`archetype-card archetype-card--mobile ${selectedArchetypeId === currentArchetypeForMobile.id ? 'archetype-card--selected' : ''}`}
+              onClick={() => setSelectedArchetypeId(currentArchetypeForMobile.id)}>
               <div className="archetype-card__image-wrapper">
                 <Image
-                  src={currentArchetypeForMobile.image || "/placeholder.svg"}
+                  src={currentArchetypeForMobile.image || '/placeholder.svg'}
                   alt={currentArchetypeForMobile.name}
                   width={300}
                   height={400}
@@ -135,15 +130,13 @@ export default function ChooseArchetypePage() {
               </div>
               <div className="archetype-card__content">
                 <h3 className="archetype-card__name">{currentArchetypeForMobile.name}</h3>
-                {currentArchetypeForMobile.description && (
-                  <p className="archetype-card__description">{currentArchetypeForMobile.description}</p>
-                )}
+                {currentArchetypeForMobile.description && <p className="archetype-card__description">{currentArchetypeForMobile.description}</p>}
                 {selectedArchetypeId === currentArchetypeForMobile.id && (
                   <div className="archetype-card__details">
                     <div className="archetype-details__section">
                       <h4 className="archetype-details__title">Core Values</h4>
                       <div className="archetype-tags">
-                        {currentArchetypeForMobile.coreValues.map((value) => (
+                        {currentArchetypeForMobile.coreValues.map(value => (
                           <span key={value} className="archetype-tag">
                             {value}
                           </span>
@@ -153,7 +146,7 @@ export default function ChooseArchetypePage() {
                     <div className="archetype-details__section">
                       <h4 className="archetype-details__title">Core Rituals</h4>
                       <div className="archetype-tags">
-                        {currentArchetypeForMobile.coreRituals.map((ritual) => (
+                        {currentArchetypeForMobile.coreRituals.map(ritual => (
                           <span key={ritual} className="archetype-tag">
                             {ritual}
                           </span>
@@ -172,26 +165,21 @@ export default function ChooseArchetypePage() {
                 )}
               </div>
             </div>
-            <button
-              onClick={handleNextMobile}
-              className="carousel-nav-button carousel-nav-button--next"
-              aria-label="Next archetype"
-            >
+            <button onClick={handleNextMobile} className="carousel-nav-button carousel-nav-button--next" aria-label="Next archetype">
               <ChevronRight />
             </button>
           </div>
 
           {/* Desktop/Tablet Grid View */}
           <div className="archetype-grid">
-            {archetypesData.map((archetype) => (
+            {archetypesData.map(archetype => (
               <div
                 key={archetype.id}
-                className={`archetype-card ${selectedArchetypeId === archetype.id ? "archetype-card--selected" : ""}`}
-                onClick={() => setSelectedArchetypeId(archetype.id)}
-              >
+                className={`archetype-card ${selectedArchetypeId === archetype.id ? 'archetype-card--selected' : ''}`}
+                onClick={() => setSelectedArchetypeId(archetype.id)}>
                 <div className="archetype-card__image-wrapper">
                   <Image
-                    src={archetype.image || "/placeholder.svg"}
+                    src={archetype.image || '/placeholder.svg'}
                     alt={archetype.name}
                     width={300}
                     height={400}
@@ -206,7 +194,7 @@ export default function ChooseArchetypePage() {
                       <div className="archetype-details__section">
                         <h4 className="archetype-details__title">Core Values</h4>
                         <div className="archetype-tags">
-                          {archetype.coreValues.map((value) => (
+                          {archetype.coreValues.map(value => (
                             <span key={value} className="archetype-tag">
                               {value}
                             </span>
@@ -216,7 +204,7 @@ export default function ChooseArchetypePage() {
                       <div className="archetype-details__section">
                         <h4 className="archetype-details__title">Core Rituals</h4>
                         <div className="archetype-tags">
-                          {archetype.coreRituals.map((ritual) => (
+                          {archetype.coreRituals.map(ritual => (
                             <span key={ritual} className="archetype-tag">
                               {ritual}
                             </span>
